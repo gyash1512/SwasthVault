@@ -1,173 +1,442 @@
-# SwasthVault 🏥
-**Centralized Medical History Management System**
+# SwasthVault - Centralized Medical History Management System
 
-A critical project that can transform public health infrastructure by providing unified, secure, and interoperable medical records for every citizen.
+A comprehensive healthcare management platform that enables secure storage, management, and sharing of medical records with role-based access control, emergency features, and complete audit trails.
 
-## 🔑 Core Objectives
+## 🏥 Features
 
-- **Unified Health Record**: Maintain every citizen's complete medical history—from allergies, prescriptions, diagnostics, surgeries to mental health
-- **Interoperability**: Allow any verified doctor/hospital across the country to access and update patient records
-- **Continuity of Care**: Enable seamless transfer of patient data between healthcare providers
-- **Authentication & Authorization**: Only patients and authorized professionals can access/update records
-- **Tamper-proof History**: Every update is timestamped and logged; past records cannot be deleted—only added with justification
-- **Emergency Access**: Paramedics/doctors can access critical medical info instantly with biometric or QR verification
+- **Unified Health Records**: Complete medical history management
+- **Role-Based Access**: Patient, Doctor, Emergency Personnel, Admin roles
+- **Emergency Access**: Quick access to critical medical information
+- **Secure Authentication**: JWT-based auth with 2FA support
+- **File Management**: Upload and manage medical documents
+- **Audit Logging**: Complete traceability of all actions
+- **Responsive Design**: Works on all devices
+- **Real-time Updates**: Live notifications and updates
 
-## 🧩 Key Features
-
-### Patient Management
-- **Aadhaar/UID Integration**: Link each record with verified national ID
-- **Health Timeline View**: Scrollable timeline of patient's entire medical journey
-- **Emergency Profile**: Quick access to critical info (blood group, allergies, chronic conditions)
-
-### Healthcare Provider Features
-- **Doctor Verification System**: Digital signatures for all medical updates
-- **Appointment & Referral History**: Complete chain of consultations and diagnoses
-- **Prescription & Medication Logs**: Track medications, dosage, and effects
-- **Lab Reports & Scans**: DICOM/PDF uploads with annotations
-- **Vaccination Records**: Including COVID-19 and other immunization data
-
-### Security & Access
-- **Offline Access Mode**: Limited data via encrypted QR code
-- **Audit Logs**: Full traceability of data access and modifications
-- **Consent-Based Access**: Third-party access (insurance, research) with patient consent
-
-## 🛡️ Privacy & Security
-
-- **End-to-End Encryption**: All data encrypted in transit and at rest
-- **Two-Factor Authentication**: Required for all healthcare providers
-- **Biometric Authentication**: For emergency access scenarios
-- **HIPAA + Indian Health Data Protection Compliant**
-- **Role-Based Access Control**: Different permission levels for different user types
-
-## 🏗️ System Architecture
-
-### Backend (Node.js + Express)
-- RESTful API with JWT authentication
-- MongoDB for flexible medical data storage
-- Redis for session management and caching
-- Blockchain integration for tamper-proof audit trails
-
-### Frontend (React.js)
-- Responsive web application
-- Progressive Web App (PWA) capabilities
-- Real-time updates with WebSocket
-- Offline-first architecture
-
-### Security Layer
-- OAuth 2.0 + OpenID Connect
-- AES-256 encryption
-- Digital signatures with PKI
-- Biometric integration APIs
-
-## 🚀 Getting Started
+## 🚀 Quick Setup
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- MongoDB (v5.0 or higher)
-- Redis (v6.0 or higher)
 
-### Installation
+- **Node.js** 18+ and npm
+- **Docker Desktop**
+- **Git**
 
-1. Clone the repository:
+### 1. Clone Repository
+
 ```bash
 git clone https://github.com/gyash1512/SwasthVault.git
 cd SwasthVault
 ```
 
-2. Install backend dependencies:
+### 2. Generate Security Keys
+
+Generate secure keys for your environment files:
+
 ```bash
+# Generate JWT secrets (64-character hex)
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+# Generate encryption key (32-character hex)
+node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
+
+# Generate IV (16-character hex)
+node -e "console.log(require('crypto').randomBytes(8).toString('hex'))"
+```
+
+### 3. Configure Backend Environment
+
+Edit `backend/.env` and add your generated keys:
+
+```env
+# JWT Configuration (Use generated 64-character hex)
+JWT_SECRET=your_generated_jwt_secret
+JWT_REFRESH_SECRET=your_generated_refresh_secret
+
+# Encryption Configuration
+ENCRYPTION_KEY=your_generated_32_char_key
+ENCRYPTION_IV=your_generated_16_char_iv
+
+# Session Configuration
+SESSION_SECRET=your_generated_session_secret
+
+# Email Configuration (Create account at https://ethereal.email/)
+SMTP_USER=your_ethereal_username
+SMTP_PASS=your_ethereal_password
+
+# External API Keys (Optional)
+AADHAAR_API_KEY=your_aadhaar_api_key
+BIOMETRIC_API_KEY=your_biometric_api_key
+SMS_API_KEY=your_sms_api_key
+```
+
+### 4. Configure Frontend Environment
+
+The `frontend/.env` file is ready to use. Optionally add:
+
+```env
+# External Services (Optional)
+REACT_APP_GOOGLE_MAPS_API_KEY=your_google_maps_key
+REACT_APP_ANALYTICS_ID=your_analytics_id
+```
+
+### 5. Start Services
+
+#### Option A: Full Docker Setup (Recommended)
+
+```bash
+# Start all services with Docker
+docker compose up --build -d
+
+# Check status
+docker compose ps
+
+# View logs
+docker compose logs -f
+```
+
+#### Option B: Development Setup
+
+```bash
+# Start databases only
+docker compose up mongodb redis -d
+
+# Start backend (new terminal)
 cd backend
 npm install
-```
-
-3. Install frontend dependencies:
-```bash
-cd ../frontend
-npm install
-```
-
-4. Set up environment variables:
-```bash
-# Copy example environment files
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-```
-
-5. Start the development servers:
-```bash
-# Terminal 1 - Backend
-cd backend
 npm run dev
 
-# Terminal 2 - Frontend
+# Start frontend (new terminal)
 cd frontend
+npm install
 npm start
 ```
 
-## 📱 User Roles
+### 6. Access Application
 
-### 1. Patients
-- View complete medical history
-- Grant/revoke access permissions
-- Download medical reports
-- Emergency QR code generation
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5000
+- **API Documentation**: http://localhost:5000/api-docs
+- **Default Login**: admin@swasthvault.com / admin123
 
-### 2. Healthcare Providers
-- Access authorized patient records
-- Add medical entries (diagnoses, prescriptions, reports)
-- Digital prescription generation
-- Referral management
+## 🐳 Docker Services
 
-### 3. Emergency Personnel
-- Limited access to critical patient info
-- Biometric-based emergency access
-- Real-time patient status updates
+The application runs 4 separate containers:
 
-### 4. System Administrators
-- User management and verification
-- System monitoring and maintenance
-- Audit trail management
-- Compliance reporting
+1. **MongoDB** (Port 27017) - Database with initialization
+2. **Redis** (Port 6379) - Caching and sessions
+3. **Backend** (Port 5000) - Node.js API server
+4. **Frontend** (Port 3000) - React app with Nginx
 
-## 🔐 Data Security Measures
+## 📁 Project Structure
 
-1. **Encryption**: AES-256 for data at rest, TLS 1.3 for data in transit
-2. **Access Control**: Multi-factor authentication and role-based permissions
-3. **Audit Trail**: Immutable blockchain-based logging
-4. **Data Integrity**: Digital signatures and hash verification
-5. **Privacy**: Zero-knowledge architecture where possible
+```
+SwasthVault/
+├── backend/                 # Node.js API server
+│   ├── .env                # Backend environment variables
+│   ├── server.js           # Main server file
+│   ├── models/             # Database models
+│   ├── routes/             # API routes
+│   ├── middleware/         # Custom middleware
+│   └── utils/              # Utility functions
+├── frontend/               # React frontend
+│   ├── .env                # Frontend environment variables
+│   ├── src/                # Source code
+│   ├── public/             # Static assets
+│   └── package.json        # Dependencies
+├── deployment/             # Docker configurations
+│   ├── mongodb/            # MongoDB initialization
+│   └── redis/              # Redis configuration
+├── docker-compose.yml      # Docker services definition
+└── README.md              # This file
+```
 
-## 📊 Compliance
+## 🔧 Development Commands
 
-- **HIPAA** (Health Insurance Portability and Accountability Act)
-- **Indian Personal Data Protection Bill**
-- **ISO 27001** Information Security Management
-- **HL7 FHIR** Healthcare data interoperability standards
+### Backend Development
+
+```bash
+cd backend
+
+# Install dependencies
+npm install
+
+# Start development server (with hot reload)
+npm run dev
+
+# Run tests
+npm test
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+```
+
+### Frontend Development
+
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+
+# Run tests
+npm test
+
+# Build for production
+npm run build
+
+# Lint code
+npm run lint
+```
+
+### Docker Management
+
+```bash
+# Start all services
+docker compose up -d
+
+# Stop all services
+docker compose down
+
+# View logs
+docker compose logs -f [service-name]
+
+# Restart specific service
+docker compose restart [service-name]
+
+# Rebuild and restart
+docker compose up --build -d
+```
+
+## 🗄️ Database Management
+
+### MongoDB
+
+```bash
+# Connect to MongoDB
+docker exec -it swasthvault-mongodb mongosh -u admin -p swasthvault_admin_password
+
+# In MongoDB shell:
+use swasthvault
+show collections
+db.users.findOne()
+```
+
+### Redis
+
+```bash
+# Connect to Redis
+docker exec -it swasthvault-redis redis-cli -a swasthvault_redis_password
+
+# Test connection
+ping
+# Should return: PONG
+```
+
+### Backup Database
+
+```bash
+# Backup MongoDB
+docker exec swasthvault-mongodb mongodump \
+  --uri="mongodb://swasthvault_user:swasthvault_user_password@localhost:27017/swasthvault?authSource=swasthvault" \
+  --out=/backup
+
+# Copy backup from container
+docker cp swasthvault-mongodb:/backup ./backup
+```
+
+## 🔒 Security Configuration
+
+### Environment Variables
+
+**Backend (.env)** - Required variables:
+- `JWT_SECRET` - 64-character hex string for JWT signing
+- `JWT_REFRESH_SECRET` - 64-character hex string for refresh tokens
+- `ENCRYPTION_KEY` - 32-character hex string for data encryption
+- `ENCRYPTION_IV` - 16-character hex string for encryption IV
+- `SESSION_SECRET` - 64-character hex string for sessions
+
+**Frontend (.env)** - Optional variables:
+- `REACT_APP_GOOGLE_MAPS_API_KEY` - For location services
+- `REACT_APP_ANALYTICS_ID` - For analytics tracking
+
+### Email Setup
+
+For development, use Ethereal Email:
+1. Go to https://ethereal.email/
+2. Click "Create Ethereal Account"
+3. Copy credentials to `backend/.env`
+4. All emails will be captured and viewable online
+
+### Default Credentials
+
+- **Admin**: admin@swasthvault.com / admin123
+- **MongoDB Admin**: admin / swasthvault_admin_password
+- **Redis**: swasthvault_redis_password
+
+**⚠️ Change all default passwords in production!**
+
+## 🧪 Testing
+
+### Backend Testing
+
+```bash
+cd backend
+npm test                    # Unit tests
+npm run test:integration    # Integration tests
+npm run test:coverage       # Coverage report
+```
+
+### Frontend Testing
+
+```bash
+cd frontend
+npm test                    # Interactive test runner
+npm run test:coverage       # Coverage report
+```
+
+## 📊 Monitoring
+
+### Health Checks
+
+```bash
+# Backend health
+curl http://localhost:5000/health
+
+# Frontend health
+curl http://localhost:3000
+
+# Database health
+docker exec swasthvault-mongodb mongosh --eval "db.adminCommand('ping')"
+docker exec swasthvault-redis redis-cli -a swasthvault_redis_password ping
+```
+
+### Logs
+
+```bash
+# View all logs
+docker compose logs
+
+# View specific service logs
+docker compose logs backend
+docker compose logs frontend
+docker compose logs mongodb
+docker compose logs redis
+
+# Follow logs in real-time
+docker compose logs -f backend
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+1. **Port conflicts**:
+   ```bash
+   # Check port usage
+   netstat -tulpn | grep :3000
+   netstat -tulpn | grep :5000
+   
+   # Kill processes if needed
+   kill -9 <PID>
+   ```
+
+2. **Database connection issues**:
+   ```bash
+   # Restart database containers
+   docker compose restart mongodb redis
+   
+   # Check container logs
+   docker compose logs mongodb
+   docker compose logs redis
+   ```
+
+3. **Node modules issues**:
+   ```bash
+   # Clear cache and reinstall
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
+
+4. **Docker issues**:
+   ```bash
+   # Clean Docker system
+   docker system prune -a
+   
+   # Rebuild containers
+   docker compose up --build -d
+   ```
+
+### Debug Mode
+
+```bash
+# Run with debug logs
+docker compose logs -f
+
+# Access container shell
+docker exec -it swasthvault-backend sh
+docker exec -it swasthvault-frontend sh
+```
+
+## 🚀 Production Deployment
+
+### Environment Setup
+
+1. **Generate secure keys** for production
+2. **Configure SSL/TLS** certificates
+3. **Set up reverse proxy** (nginx/traefik)
+4. **Configure monitoring** and logging
+5. **Set up backup schedules**
+
+### Security Checklist
+
+- [ ] Change all default passwords
+- [ ] Generate secure environment variables
+- [ ] Configure SSL/TLS
+- [ ] Set up firewall rules
+- [ ] Enable audit logging
+- [ ] Configure backup strategy
+- [ ] Set up monitoring alerts
+
+## 📚 API Documentation
+
+When the backend is running, visit http://localhost:5000/api-docs for interactive API documentation.
+
+### Key API Endpoints
+
+- `POST /api/auth/login` - User authentication
+- `GET /api/patients` - Get patient list
+- `POST /api/medical-records` - Create medical record
+- `GET /api/emergency/:patientId` - Emergency access
+- `POST /api/upload` - File upload
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new features
+5. Ensure all tests pass
+6. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## 🆘 Support
 
-For support, email support@swasthvault.gov.in or join our Slack channel.
+For issues and support:
 
-## 🗺️ Roadmap
-
-- [ ] Phase 1: Core patient record management
-- [ ] Phase 2: Healthcare provider integration
-- [ ] Phase 3: Emergency access system
-- [ ] Phase 4: AI-powered health insights
-- [ ] Phase 5: Nationwide deployment
+1. Check this README for common solutions
+2. Check the logs: `docker compose logs`
+3. Verify configuration: `docker compose config`
+4. Create an issue on GitHub with logs and error messages
 
 ---
 
-**SwasthVault** - Transforming Healthcare Through Technology 🚀
+**SwasthVault** - Transforming healthcare through secure, accessible medical record management.
