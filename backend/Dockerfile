@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci --only=production
+RUN rm -f package-lock.json && npm install --only=production
 
 # Copy application code
 COPY . .
@@ -25,7 +25,7 @@ RUN chown -R swasthvault:nodejs /app
 USER swasthvault
 
 # Expose port
-EXPOSE 5000
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \

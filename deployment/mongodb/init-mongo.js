@@ -6,8 +6,8 @@ db = db.getSiblingDB('swasthvault');
 
 // Create application user with read/write permissions
 db.createUser({
-  user: 'swasthvault_user',
-  pwd: 'swasthvault_user_password',
+  user: 'testcheck',
+  pwd: 'Check_123',
   roles: [
     {
       role: 'readWrite',
@@ -97,7 +97,7 @@ db.users.insertOne({
 });
 
 print('SwasthVault database initialized successfully');
-print('Created user: swasthvault_user');
+print('Created user: testcheck');
 print('Created collections: users, medicalrecords');
 print('Created indexes for performance optimization');
 print('Created default admin user: admin@swasthvault.com (password: admin123)');
