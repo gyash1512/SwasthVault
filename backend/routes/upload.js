@@ -309,15 +309,23 @@ router.get('/file/:filename', protect, async (req, res) => {
 });
 
 // @desc    Delete uploaded file
-// @route   DELETE /api/upload/file/:recordId/:filename
+// @route   DELETE /api/upload/delete/:recordId
 // @access  Private (Doctor only)
-router.delete('/file/:recordId/:filename', 
+router.delete('/delete/:recordId', 
   protect, 
   authorize('doctor'), 
   requireVerification, 
   async (req, res) => {
     try {
-      const { recordId, filename } = req.params;
+      const { recordId } = req.params;
+      const { filename } = req.body;
+
+      if (!filename) {
+        return res.status(400).json({
+          success: false,
+          message: 'Filename is required in request body'
+        });
+      }
 
       const record = await MedicalRecord.findById(recordId);
       if (!record) {
