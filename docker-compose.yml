@@ -5,8 +5,8 @@ services:
     container_name: swasthvault-mongodb
     restart: unless-stopped
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: swasthvault_admin_password
+      MONGO_INITDB_ROOT_USERNAME: testcheck
+      MONGO_INITDB_ROOT_PASSWORD: Check_123
       MONGO_INITDB_DATABASE: swasthvault
     ports:
       - "27017:27017"
@@ -28,7 +28,7 @@ services:
     image: redis:7.2-alpine
     container_name: swasthvault-redis
     restart: unless-stopped
-    command: redis-server --requirepass swasthvault_redis_password --appendonly yes
+    command: redis-server --requirepass Check_123 --appendonly yes
     ports:
       - "6379:6379"
     volumes:

@@ -70,6 +70,46 @@ function AppRoutes() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="timeline" 
+          element={
+            <ProtectedRoute requiredRole="patient">
+              <MedicalRecordsPage viewMode="timeline" />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="medications" 
+          element={
+            <ProtectedRoute requiredRole="patient">
+              <div className="p-6"><h1 className="text-2xl font-bold">Medications</h1><p>Medication management coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="appointments" 
+          element={
+            <ProtectedRoute requiredRole="patient">
+              <div className="p-6"><h1 className="text-2xl font-bold">Appointments</h1><p>Appointment scheduling coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="emergency-qr" 
+          element={
+            <ProtectedRoute requiredRole="patient">
+              <div className="p-6"><h1 className="text-2xl font-bold">Emergency QR Code</h1><p>QR code generation coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="health-trends" 
+          element={
+            <ProtectedRoute requiredRole="patient">
+              <div className="p-6"><h1 className="text-2xl font-bold">Health Trends</h1><p>Health analytics coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
         
         {/* Doctor-specific Routes */}
         <Route 
@@ -80,6 +120,80 @@ function AppRoutes() {
             </ProtectedRoute>
           } 
         />
+        <Route 
+          path="create-record" 
+          element={
+            <ProtectedRoute requiredRole="doctor">
+              <div className="p-6"><h1 className="text-2xl font-bold">Create Medical Record</h1><p>Record creation form coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="schedule" 
+          element={
+            <ProtectedRoute requiredRole="doctor">
+              <div className="p-6"><h1 className="text-2xl font-bold">Schedule</h1><p>Doctor schedule management coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="patient-search" 
+          element={
+            <ProtectedRoute requiredRole="doctor">
+              <div className="p-6"><h1 className="text-2xl font-bold">Patient Search</h1><p>Advanced patient search coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="analytics" 
+          element={
+            <ProtectedRoute requiredRole="doctor">
+              <div className="p-6"><h1 className="text-2xl font-bold">Analytics</h1><p>Doctor analytics dashboard coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Admin Routes */}
+        <Route 
+          path="users" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <div className="p-6"><h1 className="text-2xl font-bold">User Management</h1><p>User administration coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="all-records" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <div className="p-6"><h1 className="text-2xl font-bold">All Medical Records</h1><p>System-wide records view coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="system-analytics" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <div className="p-6"><h1 className="text-2xl font-bold">System Analytics</h1><p>System performance analytics coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="audit-logs" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <div className="p-6"><h1 className="text-2xl font-bold">Audit Logs</h1><p>System audit trails coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="system-settings" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <div className="p-6"><h1 className="text-2xl font-bold">System Settings</h1><p>System configuration coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
         
         {/* Emergency Personnel Routes */}
         <Route 
@@ -87,6 +201,30 @@ function AppRoutes() {
           element={
             <ProtectedRoute requiredRole="emergency_personnel">
               <EmergencyAccessPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="emergency-access" 
+          element={
+            <ProtectedRoute requiredRole="emergency_personnel">
+              <EmergencyAccessPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="qr-scanner" 
+          element={
+            <ProtectedRoute requiredRole="emergency_personnel">
+              <div className="p-6"><h1 className="text-2xl font-bold">QR Scanner</h1><p>Emergency QR code scanner coming soon...</p></div>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="critical-alerts" 
+          element={
+            <ProtectedRoute requiredRole="emergency_personnel">
+              <div className="p-6"><h1 className="text-2xl font-bold">Critical Alerts</h1><p>Emergency alerts dashboard coming soon...</p></div>
             </ProtectedRoute>
           } 
         />

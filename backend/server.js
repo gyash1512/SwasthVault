@@ -129,11 +129,15 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Import enhanced routes
+const medicalRecordsEnhancedRoutes = require('./routes/medicalRecordsEnhanced');
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
+app.use('/api/medical-records-enhanced', medicalRecordsEnhancedRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/upload', uploadRoutes);
