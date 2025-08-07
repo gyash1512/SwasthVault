@@ -27,7 +27,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Create non-root user for security
-#RUN addgroup -g 1001 -S nginx
 RUN adduser -S swasthvault -u 1001 -G nginx
 
 # Change ownership of nginx directories
