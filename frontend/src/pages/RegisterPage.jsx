@@ -24,6 +24,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [fieldErrors, setFieldErrors] = useState({})
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
@@ -181,11 +182,42 @@ export default function RegisterPage() {
 
       if (response.ok) {
         setSuccess('Registration successful! Please login with your credentials.')
+        setError('')
+        setFieldErrors({})
         setTimeout(() => {
           navigate('/login')
         }, 2000)
       } else {
-        setError(data.message || 'Registration failed')
+        // Handle specific field errors
+        if (data.errors && Array.isArray(data.errors)) {
+          const errors = {}
+          data.errors.forEach(err => {
+            if (err.path) {
+              errors[err.path] = err.msg
+            }
+          })
+          setFieldErrors(errors)
+          setError('Please fix the errors below')
+        } else if (data.message) {
+          // Handle specific error messages
+          if (data.message.includes('email') && data.message.includes('already exists')) {
+            setFieldErrors({ email: 'This email is already registered. Please use a different email or try logging in.' })
+            setError('Email already exists')
+          } else if (data.message.includes('aadhaar') && data.message.includes('already exists')) {
+            setFieldErrors({ aadhaarNumber: 'This Aadhaar number is already registered.' })
+            setError('Aadhaar number already exists')
+          } else if (data.message.includes('phone') && data.message.includes('already exists')) {
+            setFieldErrors({ phoneNumber: 'This phone number is already registered.' })
+            setError('Phone number already exists')
+          } else if (data.message.includes('license') && data.message.includes('already exists')) {
+            setFieldErrors({ licenseNumber: 'This license number is already registered.' })
+            setError('License number already exists')
+          } else {
+            setError(data.message)
+          }
+        } else {
+          setError('Registration failed. Please try again.')
+        }
       }
     } catch (error) {
       setError('Network error. Please try again.')
@@ -250,11 +282,19 @@ export default function RegisterPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:border-transparent"
+                  className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-medical-500 focus:border-transparent ${
+                    fieldErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                   placeholder="john.doe@example.com"
                   required
                 />
               </div>
+              {fieldErrors.email && (
+                <p className="text-sm text-red-600 mt-1 flex items-center">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  {fieldErrors.email}
+                </p>
+              )}
             </div>
 
             <div>

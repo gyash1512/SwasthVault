@@ -132,9 +132,15 @@ export default function DoctorDashboard() {
     navigate('/create-record')
   }
 
-  const handleViewPatient = (patient) => {
-    setSelectedPatient(patient)
-    // Navigate to patient details or open modal
+  const handleViewPatient = (patientRecord) => {
+    setSelectedPatient(patientRecord)
+    // For now, navigate to patient history
+    navigate(`/patient-history/${patientRecord.patient._id}`)
+  }
+
+  const handleEditRecord = (patientRecord) => {
+    // Navigate to edit the latest record or create a new one
+    navigate('/create-record', { state: { patientId: patientRecord.patient._id } })
   }
 
   const handleViewHistory = (patientId) => {
@@ -298,6 +304,7 @@ export default function DoctorDashboard() {
                       <Eye className="h-4 w-4" />
                     </button>
                     <button 
+                      onClick={() => handleEditRecord(patientRecord)}
                       className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
                       title="Edit Record"
                     >
@@ -336,29 +343,38 @@ export default function DoctorDashboard() {
               Today's Schedule
             </h3>
             <div className="space-y-3">
-              {[
-                { time: '09:00', patient: 'John Doe', type: 'Follow-up' },
-                { time: '10:30', patient: 'Jane Smith', type: 'Consultation' },
-                { time: '14:00', patient: 'Robert Wilson', type: 'Check-up' },
-                { time: '15:30', patient: 'Mary Johnson', type: 'Emergency' }
-              ].map((appointment, index) => (
+              {recentRecords.filter(record => {
+                const today = new Date();
+                const recordDate = new Date(record.visitDate);
+                return recordDate.toDateString() === today.toDateString();
+              }).slice(0, 4).map((record, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                   <div>
-                    <p className="font-medium">{appointment.patient}</p>
-                    <p className="text-sm text-muted-foreground">{appointment.type}</p>
+                    <p className="font-medium">{record.patient?.firstName} {record.patient?.lastName}</p>
+                    <p className="text-sm text-muted-foreground">{record.visitType.replace('_', ' ')}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-mono">{appointment.time}</p>
+                    <p className="text-sm font-mono">{new Date(record.visitDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
                     <span className={`text-xs px-2 py-1 rounded-full ${
-                      appointment.type === 'Emergency' ? 'bg-red-100 text-red-700' :
-                      appointment.type === 'Follow-up' ? 'bg-blue-100 text-blue-700' :
+                      record.visitType === 'emergency' ? 'bg-red-100 text-red-700' :
+                      record.visitType === 'follow_up' ? 'bg-blue-100 text-blue-700' :
                       'bg-green-100 text-green-700'
                     }`}>
-                      {appointment.type}
+                      {record.visitType.replace('_', ' ')}
                     </span>
                   </div>
                 </div>
               ))}
+              {recentRecords.filter(record => {
+                const today = new Date();
+                const recordDate = new Date(record.visitDate);
+                return recordDate.toDateString() === today.toDateString();
+              }).length === 0 && (
+                <div className="text-center py-4 text-muted-foreground">
+                  <Calendar className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No appointments scheduled for today</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -369,21 +385,97 @@ export default function DoctorDashboard() {
               Critical Alerts
             </h3>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-red-800">High BP Alert</p>
-                  <p className="text-xs text-red-600">John Doe - 180/110 mmHg</p>
-                </div>
-              </div>
+              {recentRecords.filter(record => {
+                // Check for critical vital signs
+                return record.vitalSigns?.bloodPressure?.systolic > 180 ||
+                       record.vitalSigns?.bloodPressure?.systolic < 90 ||
+                       record.vitalSigns?.temperature?.value > 102 ||
+                       record.vitalSigns?.heartRate?.value > 120 ||
+                       record.vitalSigns?.heartRate?.value < 50
+              }).slice(0, 3).map((record, index) => {
+                const getCriticalAlert = (record) => {
+                  if (record.vitalSigns?.bloodPressure?.systolic > 180) {
+                    return {
+                      type: 'High Blood Pressure',
+                      value: `${record.vitalSigns.bloodPressure.systolic}/${record.vitalSigns.bloodPressure.diastolic} mmHg`,
+                      severity: 'critical'
+                    }
+                  }
+                  if (record.vitalSigns?.temperature?.value > 102) {
+                    return {
+                      type: 'High Fever',
+                      value: `${record.vitalSigns.temperature.value}°F`,
+                      severity: 'warning'
+                    }
+                  }
+                  if (record.vitalSigns?.heartRate?.value > 120) {
+                    return {
+                      type: 'Tachycardia',
+                      value: `${record.vitalSigns.heartRate.value} bpm`,
+                      severity: 'warning'
+                    }
+                  }
+                  return {
+                    type: 'Abnormal Vitals',
+                    value: 'Review required',
+                    severity: 'warning'
+                  }
+                }
+                
+                const alert = getCriticalAlert(record)
+                
+                return (
+                  <div key={index} className={`flex items-center gap-3 p-3 border rounded-lg ${
+                    alert.severity === 'critical' ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200'
+                  }`}>
+                    <AlertTriangle className={`h-4 w-4 flex-shrink-0 ${
+                      alert.severity === 'critical' ? 'text-red-600' : 'text-yellow-600'
+                    }`} />
+                    <div>
+                      <p className={`text-sm font-medium ${
+                        alert.severity === 'critical' ? 'text-red-800' : 'text-yellow-800'
+                      }`}>{alert.type}</p>
+                      <p className={`text-xs ${
+                        alert.severity === 'critical' ? 'text-red-600' : 'text-yellow-600'
+                      }`}>
+                        {record.patient?.firstName} {record.patient?.lastName} - {alert.value}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
               
-              <div className="flex items-center gap-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <Clock className="h-4 w-4 text-yellow-600 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-yellow-800">Overdue Follow-up</p>
-                  <p className="text-xs text-yellow-600">Jane Smith - 2 weeks overdue</p>
+              {/* Check for overdue follow-ups */}
+              {recentRecords.filter(record => {
+                if (!record.treatment?.nextAppointment?.date) return false
+                const appointmentDate = new Date(record.treatment.nextAppointment.date)
+                const today = new Date()
+                return appointmentDate < today
+              }).slice(0, 2).map((record, index) => (
+                <div key={`overdue-${index}`} className="flex items-center gap-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <Clock className="h-4 w-4 text-orange-600 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-orange-800">Overdue Follow-up</p>
+                    <p className="text-xs text-orange-600">
+                      {record.patient?.firstName} {record.patient?.lastName} - 
+                      {Math.ceil((new Date() - new Date(record.treatment.nextAppointment.date)) / (1000 * 60 * 60 * 24))} days overdue
+                    </p>
+                  </div>
                 </div>
-              </div>
+              ))}
+              
+              {recentRecords.filter(record => {
+                return record.vitalSigns?.bloodPressure?.systolic > 180 ||
+                       record.vitalSigns?.temperature?.value > 102 ||
+                       record.vitalSigns?.heartRate?.value > 120 ||
+                       (record.treatment?.nextAppointment?.date && new Date(record.treatment.nextAppointment.date) < new Date())
+              }).length === 0 && (
+                <div className="text-center py-4 text-muted-foreground">
+                  <AlertTriangle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No critical alerts</p>
+                  <p className="text-xs">All patients stable</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -391,22 +483,47 @@ export default function DoctorDashboard() {
           <div className="medical-card">
             <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
             <div className="grid grid-cols-2 gap-3">
-              <button className="flex flex-col items-center p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+              <button 
+                onClick={handleCreateRecord}
+                className="flex flex-col items-center p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+              >
                 <Plus className="h-6 w-6 text-medical-600 mb-1" />
                 <span className="text-xs font-medium">New Record</span>
               </button>
               
-              <button className="flex flex-col items-center p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+              <button 
+                onClick={() => document.querySelector('input[placeholder="Search patients..."]')?.focus()}
+                className="flex flex-col items-center p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+              >
                 <Search className="h-6 w-6 text-blue-600 mb-1" />
                 <span className="text-xs font-medium">Search Patient</span>
               </button>
               
-              <button className="flex flex-col items-center p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+              <button 
+                onClick={() => {
+                  const todayRecords = recentRecords.filter(record => {
+                    const today = new Date();
+                    const recordDate = new Date(record.visitDate);
+                    return recordDate.toDateString() === today.toDateString();
+                  });
+                  if (todayRecords.length > 0) {
+                    alert(`You have ${todayRecords.length} appointments today`);
+                  } else {
+                    alert('No appointments scheduled for today');
+                  }
+                }}
+                className="flex flex-col items-center p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+              >
                 <Calendar className="h-6 w-6 text-green-600 mb-1" />
                 <span className="text-xs font-medium">Schedule</span>
               </button>
               
-              <button className="flex flex-col items-center p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+              <button 
+                onClick={() => {
+                  alert(`Analytics Summary:\n• Total Patients: ${stats.totalPatients}\n• Today's Appointments: ${stats.todayAppointments}\n• Pending Records: ${stats.pendingRecords}\n• Critical Alerts: ${stats.criticalAlerts}`);
+                }}
+                className="flex flex-col items-center p-3 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+              >
                 <TrendingUp className="h-6 w-6 text-purple-600 mb-1" />
                 <span className="text-xs font-medium">Analytics</span>
               </button>
@@ -419,45 +536,68 @@ export default function DoctorDashboard() {
       <div className="medical-card">
         <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
         <div className="space-y-4">
-          {[
-            {
-              action: 'Created medical record',
-              patient: 'John Doe',
-              time: '2 hours ago',
-              type: 'create'
-            },
-            {
-              action: 'Updated treatment plan',
-              patient: 'Jane Smith',
-              time: '4 hours ago',
-              type: 'update'
-            },
-            {
-              action: 'Shared record with specialist',
-              patient: 'Robert Wilson',
-              time: '1 day ago',
-              type: 'share'
+          {recentRecords.slice(0, 5).map((record, index) => {
+            const getTimeAgo = (date) => {
+              const now = new Date()
+              const recordDate = new Date(date)
+              const diffInHours = Math.floor((now - recordDate) / (1000 * 60 * 60))
+              
+              if (diffInHours < 1) return 'Just now'
+              if (diffInHours < 24) return `${diffInHours} hours ago`
+              const diffInDays = Math.floor(diffInHours / 24)
+              if (diffInDays === 1) return '1 day ago'
+              return `${diffInDays} days ago`
             }
-          ].map((activity, index) => (
-            <div key={index} className="flex items-center justify-between py-3 border-b border-border last:border-b-0">
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${
-                  activity.type === 'create' ? 'bg-green-100' :
-                  activity.type === 'update' ? 'bg-blue-100' :
-                  'bg-purple-100'
-                }`}>
-                  {activity.type === 'create' && <Plus className="h-4 w-4 text-green-600" />}
-                  {activity.type === 'update' && <Edit className="h-4 w-4 text-blue-600" />}
-                  {activity.type === 'share' && <Share className="h-4 w-4 text-purple-600" />}
+
+            const getActivityType = (record) => {
+              const recordAge = new Date() - new Date(record.createdAt)
+              const isNew = recordAge < 24 * 60 * 60 * 1000 // Less than 24 hours
+              
+              if (isNew) return 'create'
+              if (record.version > 1) return 'update'
+              return 'view'
+            }
+
+            const activityType = getActivityType(record)
+            
+            return (
+              <div key={index} className="flex items-center justify-between py-3 border-b border-border last:border-b-0">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${
+                    activityType === 'create' ? 'bg-green-100' :
+                    activityType === 'update' ? 'bg-blue-100' :
+                    'bg-gray-100'
+                  }`}>
+                    {activityType === 'create' && <Plus className="h-4 w-4 text-green-600" />}
+                    {activityType === 'update' && <Edit className="h-4 w-4 text-blue-600" />}
+                    {activityType === 'view' && <Eye className="h-4 w-4 text-gray-600" />}
+                  </div>
+                  <div>
+                    <p className="font-medium">
+                      {activityType === 'create' ? 'Created medical record' :
+                       activityType === 'update' ? 'Updated medical record' :
+                       'Accessed medical record'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Patient: {record.patient?.firstName} {record.patient?.lastName}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {record.visitType.replace('_', ' ')} - {record.diagnosis?.primary}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium">{activity.action}</p>
-                  <p className="text-sm text-muted-foreground">Patient: {activity.patient}</p>
-                </div>
+                <span className="text-sm text-muted-foreground">{getTimeAgo(record.createdAt)}</span>
               </div>
-              <span className="text-sm text-muted-foreground">{activity.time}</span>
+            )
+          })}
+          
+          {recentRecords.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No recent activity</p>
+              <p className="text-sm">Your recent medical records will appear here</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

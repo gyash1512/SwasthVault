@@ -397,37 +397,91 @@ export default function MedicationsPage() {
       <div className="medical-card">
         <h2 className="text-xl font-semibold mb-4">Today's Medication Schedule</h2>
         <div className="space-y-3">
-          {[
-            { time: '08:00', medication: 'Lisinopril 10mg', status: 'taken' },
-            { time: '12:00', medication: 'Vitamin D 1000IU', status: 'pending' },
-            { time: '20:00', medication: 'Atorvastatin 20mg', status: 'upcoming' }
-          ].map((reminder, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${
-                  reminder.status === 'taken' ? 'bg-green-500' :
-                  reminder.status === 'pending' ? 'bg-yellow-500' :
-                  'bg-gray-300'
-                }`}></div>
-                <div>
-                  <p className="font-medium">{reminder.medication}</p>
-                  <p className="text-sm text-muted-foreground">{reminder.time}</p>
+          {medications.filter(med => med.status === 'active').map((medication, index) => {
+            // Generate schedule based on frequency
+            const getScheduleTimes = (frequency) => {
+              const times = []
+              if (frequency.toLowerCase().includes('once') || frequency.toLowerCase().includes('daily')) {
+                times.push('08:00')
+              } else if (frequency.toLowerCase().includes('twice') || frequency.toLowerCase().includes('bid')) {
+                times.push('08:00', '20:00')
+              } else if (frequency.toLowerCase().includes('three') || frequency.toLowerCase().includes('tid')) {
+                times.push('08:00', '14:00', '20:00')
+              } else if (frequency.toLowerCase().includes('four') || frequency.toLowerCase().includes('qid')) {
+                times.push('08:00', '12:00', '16:00', '20:00')
+              } else {
+                times.push('08:00') // Default
+              }
+              return times
+            }
+
+            const scheduleTimes = getScheduleTimes(medication.frequency)
+            
+            return scheduleTimes.map((time, timeIndex) => {
+              const now = new Date()
+              const [hours, minutes] = time.split(':')
+              const scheduleTime = new Date()
+              scheduleTime.setHours(parseInt(hours), parseInt(minutes), 0, 0)
+              
+              let status = 'upcoming'
+              if (scheduleTime < now) {
+                // For demo purposes, randomly assign taken/pending for past times
+                status = Math.random() > 0.3 ? 'taken' : 'pending'
+              }
+              
+              return (
+                <div key={`${index}-${timeIndex}`} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${
+                      status === 'taken' ? 'bg-green-500' :
+                      status === 'pending' ? 'bg-yellow-500' :
+                      'bg-gray-300'
+                    }`}></div>
+                    <div>
+                      <p className="font-medium">{medication.name} {medication.dosage}</p>
+                      <p className="text-sm text-muted-foreground">{time}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {status === 'pending' && (
+                      <button 
+                        onClick={() => {
+                          // Update status to taken (for demo)
+                          alert(`Marked ${medication.name} as taken for ${time}`)
+                        }}
+                        className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors"
+                      >
+                        Mark Taken
+                      </button>
+                    )}
+                    {status === 'upcoming' && (
+                      <button 
+                        onClick={() => {
+                          alert(`Reminder set for ${medication.name} at ${time}`)
+                        }}
+                        className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
+                      >
+                        Set Reminder
+                      </button>
+                    )}
+                    {status === 'taken' && (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded text-sm">
+                        ✓ Taken
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                {reminder.status === 'pending' && (
-                  <button className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors">
-                    Mark Taken
-                  </button>
-                )}
-                {reminder.status === 'upcoming' && (
-                  <button className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors">
-                    Set Reminder
-                  </button>
-                )}
-              </div>
+              )
+            })
+          }).flat()}
+          
+          {medications.filter(med => med.status === 'active').length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>No active medications scheduled for today</p>
+              <p className="text-sm">Your medication schedule will appear here</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>

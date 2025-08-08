@@ -148,6 +148,14 @@ export default function PatientHistoryPage() {
     return age
   }
 
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -501,6 +509,63 @@ export default function PatientHistoryPage() {
                               {lab.interpretation}
                             </p>
                           )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Attached Files */}
+                {record.attachments?.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2 flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      Attached Medical Files ({record.attachments.length})
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {record.attachments.map((attachment, attachIndex) => (
+                        <div key={attachIndex} className="border border-border rounded-lg p-3 hover:bg-muted/30 transition-colors">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3 flex-1">
+                              <div className="p-2 bg-blue-100 rounded-lg">
+                                {attachment.type?.startsWith('image/') ? (
+                                  <FileText className="h-4 w-4 text-blue-600" />
+                                ) : (
+                                  <FileText className="h-4 w-4 text-blue-600" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm text-foreground truncate">
+                                  {attachment.originalName || attachment.filename}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {attachment.description}
+                                </p>
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                  <span>{formatFileSize(attachment.size)}</span>
+                                  <span>{formatDate(attachment.uploadedAt)}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-1">
+                              {attachment.type?.startsWith('image/') && (
+                                <button
+                                  onClick={() => window.open(attachment.url, '_blank')}
+                                  className="p-1 text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                                  title="View Image"
+                                >
+                                  <Eye className="h-3 w-3" />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => window.open(attachment.url, '_blank')}
+                                className="p-1 text-green-600 hover:bg-green-100 rounded transition-colors"
+                                title="Download File"
+                              >
+                                <Download className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>

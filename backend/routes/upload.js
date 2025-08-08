@@ -165,6 +165,62 @@ router.post('/medical-documents/:recordId',
   }
 );
 
+// @desc    Upload single file (for medical records)
+// @route   POST /api/upload
+// @access  Private (Doctor only)
+router.post('/',
+  protect,
+  authorize('doctor'),
+  requireVerification,
+  upload.single('file'),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: 'No file uploaded'
+        });
+      }
+
+      const { type, description } = req.body;
+
+      // Return file information
+      const fileInfo = {
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size,
+        type: req.file.mimetype,
+        url: `/uploads/${req.file.filename}`,
+        filePath: req.file.path,
+        description: description || '',
+        uploadedAt: new Date().toISOString()
+      };
+
+      logger.info(`File uploaded: ${req.file.originalname} by ${req.user.email}`);
+
+      res.status(200).json({
+        success: true,
+        message: 'File uploaded successfully',
+        ...fileInfo
+      });
+
+    } catch (error) {
+      // Clean up uploaded file if there's an error
+      if (req.file) {
+        fs.unlink(req.file.path, (err) => {
+          if (err) logger.error('Error deleting file:', err);
+        });
+      }
+
+      logger.error('Upload file error:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message || 'Failed to upload file'
+      });
+    }
+  }
+);
+
 // @desc    Upload profile picture
 // @route   POST /api/upload/profile-picture
 // @access  Private
