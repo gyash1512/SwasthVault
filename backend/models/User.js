@@ -235,19 +235,16 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Pre-save middleware to encrypt sensitive data
-userSchema.pre('validate', function(next) {
-  // Store original Aadhaar for validation, then encrypt after validation
-  if (this.isModified('aadhaarNumber')) {
-    this._originalAadhaar = this.aadhaarNumber;
-  }
-  next();
-});
-
+// Pre-save middleware to encrypt sensitive data (disabled for development)
 userSchema.pre('save', function(next) {
-  // Encrypt Aadhaar number after validation
-  if (this.isModified('aadhaarNumber') && process.env.ENCRYPTION_KEY && this._originalAadhaar) {
-    this.aadhaarNumber = this.encryptData(this._originalAadhaar);
+  // Skip encryption in development or if no encryption key is set
+  if (!process.env.ENCRYPTION_KEY || process.env.NODE_ENV === 'development') {
+    return next();
+  }
+  
+  // Encrypt Aadhaar number after validation in production only
+  if (this.isModified('aadhaarNumber')) {
+    this.aadhaarNumber = this.encryptData(this.aadhaarNumber);
   }
   next();
 });
@@ -259,25 +256,45 @@ userSchema.methods.matchPassword = async function(enteredPassword) {
 
 // Instance method to encrypt sensitive data
 userSchema.methods.encryptData = function(data) {
-  if (!process.env.ENCRYPTION_KEY || !process.env.ENCRYPTION_IV) {
+  if (!process.env.ENCRYPTION_KEY) {
     return data; // Return unencrypted in development
   }
   
-  const cipher = crypto.createCipher('aes-256-cbc', process.env.ENCRYPTION_KEY);
-  let encrypted = cipher.update(data, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return encrypted;
+  try {
+    const algorithm = 'aes-256-cbc';
+    const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
+    const iv = crypto.randomBytes(16);
+    
+    const cipher = crypto.createCipher(algorithm, key, iv);
+    let encrypted = cipher.update(data, 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    
+    return iv.toString('hex') + ':' + encrypted;
+  } catch (error) {
+    return data; // Return original if encryption fails
+  }
 };
 
 // Instance method to decrypt sensitive data
 userSchema.methods.decryptData = function(encryptedData) {
-  if (!process.env.ENCRYPTION_KEY || !process.env.ENCRYPTION_IV) {
+  if (!process.env.ENCRYPTION_KEY) {
     return encryptedData; // Return as-is in development
   }
   
   try {
-    const decipher = crypto.createDecipher('aes-256-cbc', process.env.ENCRYPTION_KEY);
-    let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+    const algorithm = 'aes-256-cbc';
+    const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
+    
+    const parts = encryptedData.split(':');
+    if (parts.length !== 2) {
+      return encryptedData; // Return original if format is wrong
+    }
+    
+    const iv = Buffer.from(parts[0], 'hex');
+    const encrypted = parts[1];
+    
+    const decipher = crypto.createDecipher(algorithm, key, iv);
+    let decrypted = decipher.update(encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
   } catch (error) {
