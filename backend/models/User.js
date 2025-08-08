@@ -236,10 +236,18 @@ userSchema.pre('save', async function(next) {
 });
 
 // Pre-save middleware to encrypt sensitive data
+userSchema.pre('validate', function(next) {
+  // Store original Aadhaar for validation, then encrypt after validation
+  if (this.isModified('aadhaarNumber')) {
+    this._originalAadhaar = this.aadhaarNumber;
+  }
+  next();
+});
+
 userSchema.pre('save', function(next) {
-  // Encrypt Aadhaar number if modified
-  if (this.isModified('aadhaarNumber') && process.env.ENCRYPTION_KEY) {
-    this.aadhaarNumber = this.encryptData(this.aadhaarNumber);
+  // Encrypt Aadhaar number after validation
+  if (this.isModified('aadhaarNumber') && process.env.ENCRYPTION_KEY && this._originalAadhaar) {
+    this.aadhaarNumber = this.encryptData(this._originalAadhaar);
   }
   next();
 });
