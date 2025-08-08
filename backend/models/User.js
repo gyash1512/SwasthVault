@@ -235,17 +235,9 @@ userSchema.pre('save', async function(next) {
   }
 });
 
-// Pre-save middleware to encrypt sensitive data (disabled for development)
+// Pre-save middleware (Aadhaar encryption disabled as requested)
 userSchema.pre('save', function(next) {
-  // Skip encryption in development or if no encryption key is set
-  if (!process.env.ENCRYPTION_KEY || process.env.NODE_ENV === 'development') {
-    return next();
-  }
-  
-  // Encrypt Aadhaar number after validation in production only
-  if (this.isModified('aadhaarNumber')) {
-    this.aadhaarNumber = this.encryptData(this.aadhaarNumber);
-  }
+  // Aadhaar encryption completely disabled
   next();
 });
 
