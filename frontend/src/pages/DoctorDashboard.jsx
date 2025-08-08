@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 import { 
   Users, 
   Calendar, 
@@ -19,6 +20,7 @@ import {
 
 export default function DoctorDashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [patients, setPatients] = useState([])
   const [recentRecords, setRecentRecords] = useState([])
   const [loading, setLoading] = useState(true)
@@ -127,13 +129,16 @@ export default function DoctorDashboard() {
   }
 
   const handleCreateRecord = () => {
-    // Navigate to create record page
-    console.log('Create new medical record')
+    navigate('/create-record')
   }
 
   const handleViewPatient = (patient) => {
     setSelectedPatient(patient)
     // Navigate to patient details or open modal
+  }
+
+  const handleViewHistory = (patientId) => {
+    navigate(`/patient-history/${patientId}`)
   }
 
   const filteredPatients = patients.filter(patient =>
@@ -299,6 +304,7 @@ export default function DoctorDashboard() {
                       <Edit className="h-4 w-4" />
                     </button>
                     <button 
+                      onClick={() => handleViewHistory(patientRecord.patient._id)}
                       className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
                       title="View History"
                     >

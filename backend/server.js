@@ -17,6 +17,7 @@ dotenv.config();
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const usersRoutes = require('./routes/users');
 const patientRoutes = require('./routes/patients');
 const doctorRoutes = require('./routes/doctors');
 const medicalRecordRoutes = require('./routes/medicalRecords');
@@ -134,6 +135,7 @@ const medicalRecordsEnhancedRoutes = require('./routes/medicalRecordsEnhanced');
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', usersRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);

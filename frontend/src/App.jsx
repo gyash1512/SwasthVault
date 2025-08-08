@@ -12,6 +12,8 @@ import DoctorDashboard from './pages/DoctorDashboard'
 import EmergencyDashboard from './pages/EmergencyDashboard'
 import MedicalRecordsPage from './pages/MedicalRecordsPage'
 import MedicationsPage from './pages/MedicationsPage'
+import CreateMedicalRecordPage from './pages/CreateMedicalRecordPage'
+import PatientHistoryPage from './pages/PatientHistoryPage'
 import ProfilePage from './pages/ProfilePage'
 import EmergencyAccessPage from './pages/EmergencyAccessPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -125,7 +127,15 @@ function AppRoutes() {
           path="create-record" 
           element={
             <ProtectedRoute requiredRole="doctor">
-              <div className="p-6"><h1 className="text-2xl font-bold">Create Medical Record</h1><p>Record creation form coming soon...</p></div>
+              <CreateMedicalRecordPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="patient-history/:patientId" 
+          element={
+            <ProtectedRoute requiredRole="doctor">
+              <PatientHistoryPage />
             </ProtectedRoute>
           } 
         />
