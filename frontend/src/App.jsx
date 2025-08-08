@@ -11,6 +11,7 @@ import PatientDashboard from './pages/PatientDashboard'
 import DoctorDashboard from './pages/DoctorDashboard'
 import EmergencyDashboard from './pages/EmergencyDashboard'
 import MedicalRecordsPage from './pages/MedicalRecordsPage'
+import MedicationsPage from './pages/MedicationsPage'
 import ProfilePage from './pages/ProfilePage'
 import EmergencyAccessPage from './pages/EmergencyAccessPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -82,7 +83,7 @@ function AppRoutes() {
           path="medications" 
           element={
             <ProtectedRoute requiredRole="patient">
-              <div className="p-6"><h1 className="text-2xl font-bold">Medications</h1><p>Medication management coming soon...</p></div>
+              <MedicationsPage />
             </ProtectedRoute>
           } 
         />
