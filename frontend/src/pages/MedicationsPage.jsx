@@ -32,10 +32,27 @@ export default function MedicationsPage() {
     try {
       setLoading(true)
       
-      // Fetch patient's medical records to extract medications
-      const response = await fetch(`/api/medical-records-enhanced/patient/${user.id}/timeline`, {
+      // Test authentication first
+      console.log('Testing authentication...')
+      const testResponse = await fetch('/api/medical-records-enhanced/test', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (testResponse.ok) {
+        const testData = await testResponse.json()
+        console.log('Auth test successful:', testData)
+      } else {
+        console.error('Auth test failed:', testResponse.status, testResponse.statusText)
+      }
+      
+      // Try to fetch medical records
+      let response = await fetch(`/api/medical-records?patientId=${user.id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
         }
       })
       

@@ -42,7 +42,8 @@ export default function DoctorDashboard() {
       // Fetch medical records where this doctor is the creator
       const recordsResponse = await fetch('/api/medical-records', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
         }
       })
       

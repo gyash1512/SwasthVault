@@ -7,6 +7,30 @@ const crypto = require('crypto');
 
 const router = express.Router();
 
+// @desc    Test endpoint for debugging
+// @route   GET /api/medical-records-enhanced/test
+// @access  Private
+router.get('/test', protect, async (req, res) => {
+  try {
+    res.status(200).json({
+      success: true,
+      message: 'Enhanced routes working',
+      user: {
+        id: req.user.id,
+        email: req.user.email,
+        role: req.user.role,
+        isVerified: req.user.isVerified
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Test endpoint error',
+      error: error.message
+    });
+  }
+});
+
 // @desc    Get patient's complete medical timeline
 // @route   GET /api/medical-records/patient/:patientId/timeline
 // @access  Private (Patient, Doctor, Emergency Personnel)
