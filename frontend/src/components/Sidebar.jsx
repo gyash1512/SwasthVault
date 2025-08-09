@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { 
   Home, 
   FileText, 
@@ -66,6 +66,7 @@ const getNavigationForRole = (role) => {
 
 export default function Sidebar({ onClose }) {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const navigation = getNavigationForRole(user?.role)
 
   const getRoleIcon = (role) => {
@@ -157,21 +158,39 @@ export default function Sidebar({ onClose }) {
           </p>
           
           {user?.role === 'patient' && (
-            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-emergency-600 hover:bg-emergency-50 rounded-lg transition-colors">
+            <button 
+              onClick={() => {
+                navigate('/emergency-qr')
+                onClose()
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-emergency-600 hover:bg-emergency-50 rounded-lg transition-colors"
+            >
               <Shield className="h-4 w-4" />
               Emergency Access
             </button>
           )}
           
           {user?.role === 'doctor' && (
-            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-medical-600 hover:bg-medical-50 rounded-lg transition-colors">
+            <button 
+              onClick={() => {
+                navigate('/create-record')
+                onClose()
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-medical-600 hover:bg-medical-50 rounded-lg transition-colors"
+            >
               <UserPlus className="h-4 w-4" />
               New Patient Record
             </button>
           )}
           
           {user?.role === 'emergency_personnel' && (
-            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+            <button 
+              onClick={() => {
+                navigate('/qr-scanner')
+                onClose()
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
               <QrCode className="h-4 w-4" />
               Scan QR Code
             </button>

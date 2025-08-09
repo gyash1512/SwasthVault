@@ -15,9 +15,15 @@ import MedicationsPage from './pages/MedicationsPage'
 import CreateMedicalRecordPage from './pages/CreateMedicalRecordPage'
 import PatientHistoryPage from './pages/PatientHistoryPage'
 import ProfilePage from './pages/ProfilePage'
+import AppointmentsPage from './pages/AppointmentsPage'
+import EmergencyQRPage from './pages/EmergencyQRPage'
+import HealthTrendsPage from './pages/HealthTrendsPage'
+import DoctorSchedulePage from './pages/DoctorSchedulePage'
+import PatientSearchPage from './pages/PatientSearchPage'
 import EmergencyAccessPage from './pages/EmergencyAccessPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
+import ErrorBoundary from './components/ErrorBoundary'
 import { useAuth } from './hooks/useAuth'
 import './index.css'
 
@@ -93,7 +99,7 @@ function AppRoutes() {
           path="appointments" 
           element={
             <ProtectedRoute requiredRole="patient">
-              <div className="p-6"><h1 className="text-2xl font-bold">Appointments</h1><p>Appointment scheduling coming soon...</p></div>
+              <AppointmentsPage />
             </ProtectedRoute>
           } 
         />
@@ -101,7 +107,7 @@ function AppRoutes() {
           path="emergency-qr" 
           element={
             <ProtectedRoute requiredRole="patient">
-              <div className="p-6"><h1 className="text-2xl font-bold">Emergency QR Code</h1><p>QR code generation coming soon...</p></div>
+              <EmergencyQRPage />
             </ProtectedRoute>
           } 
         />
@@ -109,7 +115,7 @@ function AppRoutes() {
           path="health-trends" 
           element={
             <ProtectedRoute requiredRole="patient">
-              <div className="p-6"><h1 className="text-2xl font-bold">Health Trends</h1><p>Health analytics coming soon...</p></div>
+              <HealthTrendsPage />
             </ProtectedRoute>
           } 
         />
@@ -143,7 +149,7 @@ function AppRoutes() {
           path="schedule" 
           element={
             <ProtectedRoute requiredRole="doctor">
-              <div className="p-6"><h1 className="text-2xl font-bold">Schedule</h1><p>Doctor schedule management coming soon...</p></div>
+              <DoctorSchedulePage />
             </ProtectedRoute>
           } 
         />
@@ -151,7 +157,7 @@ function AppRoutes() {
           path="patient-search" 
           element={
             <ProtectedRoute requiredRole="doctor">
-              <div className="p-6"><h1 className="text-2xl font-bold">Patient Search</h1><p>Advanced patient search coming soon...</p></div>
+              <PatientSearchPage />
             </ProtectedRoute>
           } 
         />
@@ -249,17 +255,19 @@ function AppRoutes() {
 
 function App() {
   return (
-    <Router>
-      <ThemeProvider>
-        <AuthProvider>
-          <ToastProvider>
-            <div className="min-h-screen bg-background text-foreground">
-              <AppRoutes />
-            </div>
-          </ToastProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <ThemeProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <div className="min-h-screen bg-background text-foreground">
+                <AppRoutes />
+              </div>
+            </ToastProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </Router>
+    </ErrorBoundary>
   )
 }
 

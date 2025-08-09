@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { useNavigate } from 'react-router-dom'
 import { 
   Heart, 
   Calendar, 
@@ -17,6 +18,7 @@ import {
 
 export default function PatientDashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [medicalRecords, setMedicalRecords] = useState([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
@@ -303,22 +305,34 @@ export default function PatientDashboard() {
       <div className="medical-card">
         <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="flex flex-col items-center p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+          <button 
+            onClick={() => navigate('/appointments')}
+            className="flex flex-col items-center p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+          >
             <Calendar className="h-8 w-8 text-medical-600 mb-2" />
             <span className="text-sm font-medium">Book Appointment</span>
           </button>
           
-          <button className="flex flex-col items-center p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+          <button 
+            onClick={() => navigate('/medical-records')}
+            className="flex flex-col items-center p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+          >
             <FileText className="h-8 w-8 text-health-600 mb-2" />
             <span className="text-sm font-medium">View Records</span>
           </button>
           
-          <button className="flex flex-col items-center p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+          <button 
+            onClick={() => navigate('/medications')}
+            className="flex flex-col items-center p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+          >
             <Pill className="h-8 w-8 text-blue-600 mb-2" />
             <span className="text-sm font-medium">Medications</span>
           </button>
           
-          <button className="flex flex-col items-center p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
+          <button 
+            onClick={() => navigate('/health-trends')}
+            className="flex flex-col items-center p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+          >
             <TrendingUp className="h-8 w-8 text-green-600 mb-2" />
             <span className="text-sm font-medium">Health Trends</span>
           </button>
