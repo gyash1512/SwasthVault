@@ -4,8 +4,8 @@ import {
   QrCode, 
   Download, 
   Share, 
-  Print, 
-  Shield, 
+  Printer, 
+  Shield,
   AlertTriangle,
   Heart,
   Phone,
@@ -132,7 +132,7 @@ export default function EmergencyQRPage() {
             onClick={handlePrint}
             className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted/50 transition-colors"
           >
-            <Print className="h-4 w-4" />
+            <Printer className="h-4 w-4" />
             Print
           </button>
         </div>
