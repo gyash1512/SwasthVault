@@ -21,9 +21,11 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 export default function MedicalRecordsPage({ viewMode = 'patient' }) {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedRecord, setSelectedRecord] = useState(null)
@@ -86,8 +88,7 @@ export default function MedicalRecordsPage({ viewMode = 'patient' }) {
   }
 
   const handleViewRecord = (record) => {
-    setSelectedRecord(record)
-    setExpandedRecord(expandedRecord === record._id ? null : record._id)
+    navigate(`/medical-records/${record._id}`)
   }
 
   const handleViewVersionHistory = (record) => {
@@ -148,7 +149,10 @@ export default function MedicalRecordsPage({ viewMode = 'patient' }) {
         </div>
         
         {viewMode === 'doctor' && (
-          <button className="bg-medical-600 text-white px-4 py-2 rounded-lg hover:bg-medical-700 transition-colors flex items-center gap-2">
+          <button 
+            onClick={() => navigate('/create-record')}
+            className="bg-medical-600 text-white px-4 py-2 rounded-lg hover:bg-medical-700 transition-colors flex items-center gap-2"
+          >
             <Plus className="h-4 w-4" />
             New Record
           </button>
@@ -280,7 +284,7 @@ export default function MedicalRecordsPage({ viewMode = 'patient' }) {
                   className="p-2 text-medical-600 hover:bg-medical-100 rounded-lg transition-colors"
                   title="View Details"
                 >
-                  {expandedRecord === record._id ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  <Eye className="h-4 w-4" />
                 </button>
                 <button 
                   onClick={() => handleViewVersionHistory(record)}
@@ -291,6 +295,7 @@ export default function MedicalRecordsPage({ viewMode = 'patient' }) {
                 </button>
                 {viewMode === 'doctor' && (
                   <button 
+                    onClick={() => navigate(`/create-record?recordId=${record._id}`)}
                     className="p-2 text-green-600 hover:bg-green-100 rounded-lg transition-colors"
                     title="Edit Record"
                   >
@@ -298,6 +303,7 @@ export default function MedicalRecordsPage({ viewMode = 'patient' }) {
                   </button>
                 )}
                 <button 
+                  onClick={() => alert('Share functionality coming soon!')}
                   className="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors"
                   title="Share Record"
                 >
@@ -305,119 +311,6 @@ export default function MedicalRecordsPage({ viewMode = 'patient' }) {
                 </button>
               </div>
             </div>
-
-            {/* Expanded Record Details */}
-            {expandedRecord === record._id && (
-              <div className="border-t border-border pt-4 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Vital Signs */}
-                  {record.vitalSigns && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium flex items-center gap-2">
-                        <Activity className="h-4 w-4 text-red-600" />
-                        Vital Signs
-                      </h4>
-                      <div className="space-y-1 text-sm">
-                        {record.vitalSigns.bloodPressure && (
-                          <p>BP: {record.vitalSigns.bloodPressure.systolic}/{record.vitalSigns.bloodPressure.diastolic} mmHg</p>
-                        )}
-                        {record.vitalSigns.heartRate && (
-                          <p>Heart Rate: {record.vitalSigns.heartRate.value} bpm</p>
-                        )}
-                        {record.vitalSigns.temperature && (
-                          <p>Temperature: {record.vitalSigns.temperature.value}°{record.vitalSigns.temperature.unit === 'celsius' ? 'C' : 'F'}</p>
-                        )}
-                        {record.vitalSigns.weight && (
-                          <p>Weight: {record.vitalSigns.weight.value} {record.vitalSigns.weight.unit}</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Medications */}
-                  {record.treatment?.medications?.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium flex items-center gap-2">
-                        <Pill className="h-4 w-4 text-blue-600" />
-                        Medications
-                      </h4>
-                      <div className="space-y-1 text-sm">
-                        {record.treatment.medications.slice(0, 3).map((med, idx) => (
-                          <p key={idx}>{med.name} - {med.dosage} {med.frequency}</p>
-                        ))}
-                        {record.treatment.medications.length > 3 && (
-                          <p className="text-muted-foreground">+{record.treatment.medications.length - 3} more</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Lab Results */}
-                  {record.labResults?.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                        Lab Results
-                      </h4>
-                      <div className="space-y-1 text-sm">
-                        {record.labResults.slice(0, 2).map((lab, idx) => (
-                          <div key={idx}>
-                            <p className="font-medium">{lab.testName}</p>
-                            <p className="text-muted-foreground">{new Date(lab.testDate).toLocaleDateString()}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Allergies & Alerts */}
-                {record.allergies?.length > 0 && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <h4 className="font-medium flex items-center gap-2 text-red-800 mb-2">
-                      <AlertTriangle className="h-4 w-4" />
-                      Allergies & Alerts
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {record.allergies.map((allergy, idx) => (
-                        <span key={idx} className="px-2 py-1 bg-red-100 text-red-700 rounded text-sm">
-                          {allergy.allergen} ({allergy.severity})
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Physical Examination */}
-                {record.physicalExamination && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Physical Examination</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      {Object.entries(record.physicalExamination).map(([system, finding]) => (
-                        finding && (
-                          <div key={system}>
-                            <p className="font-medium capitalize">{system.replace(/([A-Z])/g, ' $1')}</p>
-                            <p className="text-muted-foreground">{finding}</p>
-                          </div>
-                        )
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Treatment Plan */}
-                {record.treatment?.recommendations?.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Treatment Recommendations</h4>
-                    <ul className="list-disc list-inside text-sm space-y-1">
-                      {record.treatment.recommendations.map((rec, idx) => (
-                        <li key={idx} className="text-muted-foreground">{rec}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         ))}
 

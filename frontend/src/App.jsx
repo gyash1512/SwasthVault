@@ -14,12 +14,21 @@ import MedicalRecordsPage from './pages/MedicalRecordsPage'
 import MedicationsPage from './pages/MedicationsPage'
 import CreateMedicalRecordPage from './pages/CreateMedicalRecordPage'
 import PatientHistoryPage from './pages/PatientHistoryPage'
+import MedicalRecordDetailPage from './pages/MedicalRecordDetailPage'
 import ProfilePage from './pages/ProfilePage'
 import AppointmentsPage from './pages/AppointmentsPage'
 import EmergencyQRPage from './pages/EmergencyQRPage'
 import HealthTrendsPage from './pages/HealthTrendsPage'
 import DoctorSchedulePage from './pages/DoctorSchedulePage'
 import PatientSearchPage from './pages/PatientSearchPage'
+import DoctorAnalyticsPage from './pages/DoctorAnalyticsPage'
+import UserManagementPage from './pages/UserManagementPage'
+import SystemAnalyticsPage from './pages/SystemAnalyticsPage'
+import AuditLogsPage from './pages/AuditLogsPage'
+import SystemSettingsPage from './pages/SystemSettingsPage'
+import AllRecordsPage from './pages/AllRecordsPage'
+import QRScannerPage from './pages/QRScannerPage'
+import CriticalAlertsPage from './pages/CriticalAlertsPage'
 import EmergencyAccessPage from './pages/EmergencyAccessPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -68,6 +77,7 @@ function AppRoutes() {
         
         {/* Common Routes */}
         <Route path="medical-records" element={<MedicalRecordsPage />} />
+        <Route path="medical-records/:recordId" element={<MedicalRecordDetailPage />} />
         <Route path="profile" element={<ProfilePage />} />
         
         {/* Patient-specific Routes */}
@@ -165,7 +175,7 @@ function AppRoutes() {
           path="analytics" 
           element={
             <ProtectedRoute requiredRole="doctor">
-              <div className="p-6"><h1 className="text-2xl font-bold">Analytics</h1><p>Doctor analytics dashboard coming soon...</p></div>
+              <DoctorAnalyticsPage />
             </ProtectedRoute>
           } 
         />
@@ -175,7 +185,7 @@ function AppRoutes() {
           path="users" 
           element={
             <ProtectedRoute requiredRole="admin">
-              <div className="p-6"><h1 className="text-2xl font-bold">User Management</h1><p>User administration coming soon...</p></div>
+              <UserManagementPage />
             </ProtectedRoute>
           } 
         />
@@ -183,7 +193,7 @@ function AppRoutes() {
           path="all-records" 
           element={
             <ProtectedRoute requiredRole="admin">
-              <div className="p-6"><h1 className="text-2xl font-bold">All Medical Records</h1><p>System-wide records view coming soon...</p></div>
+              <AllRecordsPage />
             </ProtectedRoute>
           } 
         />
@@ -191,7 +201,7 @@ function AppRoutes() {
           path="system-analytics" 
           element={
             <ProtectedRoute requiredRole="admin">
-              <div className="p-6"><h1 className="text-2xl font-bold">System Analytics</h1><p>System performance analytics coming soon...</p></div>
+              <SystemAnalyticsPage />
             </ProtectedRoute>
           } 
         />
@@ -199,7 +209,7 @@ function AppRoutes() {
           path="audit-logs" 
           element={
             <ProtectedRoute requiredRole="admin">
-              <div className="p-6"><h1 className="text-2xl font-bold">Audit Logs</h1><p>System audit trails coming soon...</p></div>
+              <AuditLogsPage />
             </ProtectedRoute>
           } 
         />
@@ -207,7 +217,7 @@ function AppRoutes() {
           path="system-settings" 
           element={
             <ProtectedRoute requiredRole="admin">
-              <div className="p-6"><h1 className="text-2xl font-bold">System Settings</h1><p>System configuration coming soon...</p></div>
+              <SystemSettingsPage />
             </ProtectedRoute>
           } 
         />
@@ -233,7 +243,7 @@ function AppRoutes() {
           path="qr-scanner" 
           element={
             <ProtectedRoute requiredRole="emergency_personnel">
-              <div className="p-6"><h1 className="text-2xl font-bold">QR Scanner</h1><p>Emergency QR code scanner coming soon...</p></div>
+              <QRScannerPage />
             </ProtectedRoute>
           } 
         />
@@ -241,7 +251,7 @@ function AppRoutes() {
           path="critical-alerts" 
           element={
             <ProtectedRoute requiredRole="emergency_personnel">
-              <div className="p-6"><h1 className="text-2xl font-bold">Critical Alerts</h1><p>Emergency alerts dashboard coming soon...</p></div>
+              <CriticalAlertsPage />
             </ProtectedRoute>
           } 
         />

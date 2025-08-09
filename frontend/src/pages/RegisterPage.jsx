@@ -236,7 +236,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  First Name *
+                  First Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -254,7 +254,7 @@ export default function RegisterPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Last Name *
+                  Last Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -273,7 +273,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address *
+                Email Address <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -299,7 +299,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Password *
+                Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -324,7 +324,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm Password *
+                Confirm Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -349,7 +349,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Role *
+                Role <span className="text-red-500">*</span>
               </label>
               <div className="grid grid-cols-2 gap-4">
                 <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
@@ -388,7 +388,7 @@ export default function RegisterPage() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number *
+                Phone Number <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -407,7 +407,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of Birth *
+                  Date of Birth <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -424,7 +424,7 @@ export default function RegisterPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gender *
+                  Gender <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="gender"
@@ -443,7 +443,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Aadhaar Number *
+                Aadhaar Number <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -469,7 +469,7 @@ export default function RegisterPage() {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Street Address *
+                Street Address <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -488,7 +488,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City *
+                  City <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -503,7 +503,7 @@ export default function RegisterPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  State *
+                  State <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -519,7 +519,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                PIN Code *
+                PIN Code <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -600,7 +600,7 @@ export default function RegisterPage() {
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Specialization *
+                    Specialization <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -615,7 +615,7 @@ export default function RegisterPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Medical License Number *
+                    Medical License Number <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"

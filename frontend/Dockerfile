@@ -7,9 +7,9 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-
 # Install dependencies
-RUN npm ci
+# Using npm install to create a consistent lock file based on package.json
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .

@@ -189,12 +189,19 @@ export default function ProfilePage() {
                   {user?.firstName?.[0]}{user?.lastName?.[0]}
                 </span>
               </div>
-              <button
-                type="button"
-                className="absolute bottom-0 right-0 p-2 bg-white border border-border rounded-full shadow-sm hover:bg-muted transition-colors"
+              <input
+                type="file"
+                id="profile-picture-upload"
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => alert('Profile picture upload coming soon!')}
+              />
+              <label
+                htmlFor="profile-picture-upload"
+                className="absolute bottom-0 right-0 p-2 bg-white border border-border rounded-full shadow-sm hover:bg-muted transition-colors cursor-pointer"
               >
                 <Camera className="h-4 w-4" />
-              </button>
+              </label>
             </div>
             
             <div className="flex-1">

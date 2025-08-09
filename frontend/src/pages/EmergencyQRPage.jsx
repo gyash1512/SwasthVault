@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { 
-  QrCode, 
   Download, 
   Share, 
   Printer, 
@@ -15,6 +14,7 @@ import {
   Copy,
   CheckCircle
 } from 'lucide-react'
+import QRCode from 'qrcode.react'
 
 export default function EmergencyQRPage() {
   const { user } = useAuth()
@@ -142,7 +142,7 @@ export default function EmergencyQRPage() {
         {/* QR Code Display */}
         <div className="medical-card">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <QrCode className="h-5 w-5 text-emergency-600" />
+            <QRCode value={qrData} size={24} />
             Your Emergency QR Code
           </h2>
           
@@ -150,7 +150,7 @@ export default function EmergencyQRPage() {
             {/* QR Code Placeholder - In real implementation, use a QR code library */}
             <div className="bg-white p-8 rounded-lg border-2 border-dashed border-emergency-300 mb-4 mx-auto max-w-xs">
               <div className="w-48 h-48 mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
-                <QrCode className="h-24 w-24 text-emergency-600" />
+                <QRCode value={qrData} size={192} />
               </div>
               <p className="text-xs text-muted-foreground mt-4">
                 Emergency Medical QR Code

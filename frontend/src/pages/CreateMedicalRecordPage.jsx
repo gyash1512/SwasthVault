@@ -69,6 +69,9 @@ export default function CreateMedicalRecordPage() {
         pincode: '123456'
       },
       registrationNumber: 'HOSP001'
+    },
+    digitalSignature: {
+      doctorSignature: ''
     }
   })
 
@@ -311,6 +314,7 @@ export default function CreateMedicalRecordPage() {
     if (!formData.patient) errors.patient = 'Please select a patient'
     if (!formData.chiefComplaint.trim()) errors.chiefComplaint = 'Chief complaint is required'
     if (!formData.diagnosis.primary.trim()) errors.primaryDiagnosis = 'Primary diagnosis is required'
+    if (!formData.digitalSignature.doctorSignature.trim()) errors.doctorSignature = 'Doctor signature is required'
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors)
@@ -423,7 +427,7 @@ export default function CreateMedicalRecordPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Patient *</label>
+              <label className="block text-sm font-medium mb-2">Patient <span className="text-red-500">*</span></label>
               <select
                 name="patient"
                 value={formData.patient}
@@ -441,7 +445,7 @@ export default function CreateMedicalRecordPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Visit Type *</label>
+              <label className="block text-sm font-medium mb-2">Visit Type <span className="text-red-500">*</span></label>
               <select
                 name="visitType"
                 value={formData.visitType}
@@ -460,7 +464,7 @@ export default function CreateMedicalRecordPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Visit Date *</label>
+              <label className="block text-sm font-medium mb-2">Visit Date <span className="text-red-500">*</span></label>
               <input
                 type="date"
                 name="visitDate"
@@ -482,7 +486,7 @@ export default function CreateMedicalRecordPage() {
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Chief Complaint *</label>
+              <label className="block text-sm font-medium mb-2">Chief Complaint <span className="text-red-500">*</span></label>
               <textarea
                 name="chiefComplaint"
                 value={formData.chiefComplaint}
@@ -565,7 +569,7 @@ export default function CreateMedicalRecordPage() {
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Primary Diagnosis *</label>
+              <label className="block text-sm font-medium mb-2">Primary Diagnosis <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 name="diagnosis.primary"
