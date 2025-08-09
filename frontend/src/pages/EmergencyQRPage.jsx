@@ -14,7 +14,6 @@ import {
   Copy,
   CheckCircle
 } from 'lucide-react'
-import QRCode from 'qrcode.react'
 
 export default function EmergencyQRPage() {
   const { user } = useAuth()
