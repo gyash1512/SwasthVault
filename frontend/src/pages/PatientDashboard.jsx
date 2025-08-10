@@ -36,7 +36,7 @@ export default function PatientDashboard() {
     try {
       setLoading(true)
       // Fetch patient's medical records
-      const response = await fetch(`/api/medical-records-enhanced/patient/${user.id}/timeline`, {
+      const response = await fetch(`/api/medical-records/patient/${user.id}/timeline`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -197,7 +197,11 @@ export default function PatientDashboard() {
                       </span>
                     </div>
                   </div>
-                  <button className="text-medical-600 hover:text-medical-700">
+                  <button 
+                    onClick={() => navigate(`/medical-records/${record._id}`)}
+                    className="p-2 text-medical-600 hover:bg-medical-100 rounded-lg transition-colors"
+                    title="View Details"
+                  >
                     <FileText className="h-4 w-4" />
                   </button>
                 </div>

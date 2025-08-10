@@ -24,6 +24,7 @@ const medicalRecordRoutes = require('./routes/medicalRecords');
 const emergencyRoutes = require('./routes/emergency');
 const auditRoutes = require('./routes/audit');
 const uploadRoutes = require('./routes/upload');
+const appointmentRoutes = require('./routes/appointments');
 
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
@@ -130,19 +131,16 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Import enhanced routes
-const medicalRecordsEnhancedRoutes = require('./routes/medicalRecordsEnhanced');
-
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
-app.use('/api/medical-records', medicalRecordsEnhancedRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

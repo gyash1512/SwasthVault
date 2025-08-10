@@ -36,8 +36,7 @@ export default function AppointmentsPage() {
   const fetchAppointments = async () => {
     try {
       setLoading(true)
-      // For now, we'll create mock appointments based on medical records
-      const response = await fetch(`/api/medical-records?patientId=${user.id}`, {
+      const response = await fetch('/api/appointments', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
@@ -46,64 +45,14 @@ export default function AppointmentsPage() {
       
       if (response.ok) {
         const data = await response.json()
-        const records = data.data || []
-        
-        // Convert medical records to appointments and add some future appointments
-        const pastAppointments = records.map((record, index) => ({
-          id: `past-${record._id}`,
-          type: 'past',
-          status: 'completed',
-          date: record.visitDate,
-          time: '10:00',
-          doctor: {
-            name: `Dr. ${record.doctor?.firstName} ${record.doctor?.lastName}`,
-            specialization: record.doctor?.specialization || 'General Medicine',
-            id: record.doctor?._id
-          },
-          visitType: record.visitType,
-          diagnosis: record.diagnosis?.primary,
-          hospital: record.hospital?.name || 'City General Hospital',
-          notes: record.chiefComplaint
-        }))
-
-        // Add some future appointments
-        const futureAppointments = [
-          {
-            id: 'future-1',
-            type: 'upcoming',
-            status: 'confirmed',
-            date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            time: '14:30',
-            doctor: {
-              name: 'Dr. Sarah Johnson',
-              specialization: 'Cardiology',
-              id: 'doc-1'
-            },
-            visitType: 'follow_up',
-            hospital: 'Heart Care Center',
-            notes: 'Follow-up for blood pressure monitoring'
-          },
-          {
-            id: 'future-2',
-            type: 'upcoming',
-            status: 'pending',
-            date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            time: '11:00',
-            doctor: {
-              name: 'Dr. Michael Chen',
-              specialization: 'Dermatology',
-              id: 'doc-2'
-            },
-            visitType: 'consultation',
-            hospital: 'Skin Care Clinic',
-            notes: 'Routine skin checkup'
-          }
-        ]
-
-        setAppointments([...futureAppointments, ...pastAppointments])
+        setAppointments(data.data || [])
+      } else {
+        console.error('Failed to fetch appointments')
+        setAppointments([])
       }
     } catch (error) {
       console.error('Error fetching appointments:', error)
+      setAppointments([])
     } finally {
       setLoading(false)
     }
@@ -171,24 +120,91 @@ export default function AppointmentsPage() {
   }
 
   const handleBookAppointment = () => {
+    setSelectedAppointment(null) // Clear any previously selected appointment for reschedule
     setShowBookModal(true)
   }
 
-  const handleCancelAppointment = (appointmentId) => {
-    if (confirm('Are you sure you want to cancel this appointment?')) {
-      setAppointments(prev => 
-        prev.map(apt => 
-          apt.id === appointmentId 
-            ? { ...apt, status: 'cancelled' }
-            : apt
-        )
-      )
+  const handleCancelAppointment = async (appointmentId) => {
+    if (window.confirm('Are you sure you want to cancel this appointment?')) {
+      try {
+        const response = await fetch(`/api/appointments/${appointmentId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status: 'cancelled' })
+        })
+
+        if (response.ok) {
+          alert('Appointment cancelled successfully!')
+          fetchAppointments() // Refresh the list
+        } else {
+          const errorData = await response.json()
+          alert(`Failed to cancel appointment: ${errorData.message}`)
+        }
+      } catch (error) {
+        console.error('Error cancelling appointment:', error)
+        alert('An error occurred while cancelling the appointment.')
+      }
     }
   }
 
   const handleRescheduleAppointment = (appointment) => {
     setSelectedAppointment(appointment)
     setShowBookModal(true)
+  }
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault()
+    const form = e.target
+    const doctorId = form.doctor.value
+    const date = form.date.value
+    const time = form.time.value
+    const reason = form.reason.value
+
+    if (!doctorId || !date || !time || !reason) {
+      alert('Please fill in all required fields.')
+      return
+    }
+
+    try {
+      let response
+      if (selectedAppointment) {
+        // Reschedule existing appointment
+        response = await fetch(`/api/appointments/${selectedAppointment._id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ doctor: doctorId, date, time, reason, status: 'pending' })
+        })
+      } else {
+        // Book new appointment
+        response = await fetch('/api/appointments', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ patient: user.id, doctor: doctorId, date, time, reason })
+        })
+      }
+
+      if (response.ok) {
+        alert(`Appointment ${selectedAppointment ? 'rescheduled' : 'booked'} successfully!`)
+        setShowBookModal(false)
+        setSelectedAppointment(null)
+        fetchAppointments() // Refresh the list
+      } else {
+        const errorData = await response.json()
+        alert(`Failed to ${selectedAppointment ? 'reschedule' : 'book'} appointment: ${errorData.message}`)
+      }
+    } catch (error) {
+      console.error('Error submitting appointment:', error)
+      alert('An error occurred. Please try again.')
+    }
   }
 
   if (loading) {
@@ -430,10 +446,15 @@ export default function AppointmentsPage() {
               {selectedAppointment ? 'Reschedule Appointment' : 'Book New Appointment'}
             </h3>
             
-            <div className="space-y-4">
+            <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Select Doctor</label>
-                <select className="w-full p-3 border border-border rounded-lg">
+                <select 
+                  name="doctor" 
+                  defaultValue={selectedAppointment?.doctor?._id}
+                  required
+                  className="w-full p-3 border border-border rounded-lg"
+                >
                   <option value="">Choose a doctor</option>
                   {doctors.map(doctor => (
                     <option key={doctor._id} value={doctor._id}>
@@ -447,55 +468,56 @@ export default function AppointmentsPage() {
                 <label className="block text-sm font-medium mb-2">Preferred Date</label>
                 <input
                   type="date"
+                  name="date"
+                  defaultValue={selectedAppointment?.date ? new Date(selectedAppointment.date).toISOString().split('T')[0] : ''}
                   min={new Date().toISOString().split('T')[0]}
+                  required
                   className="w-full p-3 border border-border rounded-lg"
                 />
               </div>
               
               <div>
                 <label className="block text-sm font-medium mb-2">Preferred Time</label>
-                <select className="w-full p-3 border border-border rounded-lg">
-                  <option value="">Select time</option>
-                  <option value="09:00">09:00 AM</option>
-                  <option value="10:00">10:00 AM</option>
-                  <option value="11:00">11:00 AM</option>
-                  <option value="14:00">02:00 PM</option>
-                  <option value="15:00">03:00 PM</option>
-                  <option value="16:00">04:00 PM</option>
-                </select>
+                <input
+                  type="time"
+                  name="time"
+                  defaultValue={selectedAppointment?.time || ''}
+                  required
+                  className="w-full p-3 border border-border rounded-lg"
+                />
               </div>
               
               <div>
                 <label className="block text-sm font-medium mb-2">Reason for Visit</label>
                 <textarea
+                  name="reason"
                   rows={3}
+                  defaultValue={selectedAppointment?.reason || ''}
+                  required
                   className="w-full p-3 border border-border rounded-lg"
                   placeholder="Describe your symptoms or reason for consultation"
                 />
               </div>
-            </div>
             
-            <div className="flex justify-end gap-4 mt-6">
-              <button
-                onClick={() => {
-                  setShowBookModal(false)
-                  setSelectedAppointment(null)
-                }}
-                className="px-4 py-2 border border-border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  alert('Appointment booking functionality will be implemented with backend integration')
-                  setShowBookModal(false)
-                  setSelectedAppointment(null)
-                }}
-                className="px-4 py-2 bg-medical-600 text-white rounded-lg hover:bg-medical-700 transition-colors"
-              >
-                {selectedAppointment ? 'Reschedule' : 'Book Appointment'}
-              </button>
-            </div>
+              <div className="flex justify-end gap-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowBookModal(false)
+                    setSelectedAppointment(null)
+                  }}
+                  className="px-4 py-2 border border-border rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-medical-600 text-white rounded-lg hover:bg-medical-700 transition-colors"
+                >
+                  {selectedAppointment ? 'Reschedule' : 'Book Appointment'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

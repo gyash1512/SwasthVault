@@ -24,42 +24,22 @@ export default function DoctorAnalyticsPage() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true)
-      // Mock analytics data - in real implementation, fetch from API
-      const mockData = {
-        patientCount: 128,
-        newPatients: 12,
-        appointmentsToday: 8,
-        totalRecords: 452,
-        commonDiagnoses: [
-          { name: 'Hypertension', count: 45 },
-          { name: 'Diabetes', count: 32 },
-          { name: 'Common Cold', count: 28 },
-          { name: 'Asthma', count: 19 },
-          { name: 'Migraine', count: 15 }
-        ],
-        patientDemographics: {
-          age: [
-            { range: '0-18', count: 25 },
-            { range: '19-35', count: 45 },
-            { range: '36-50', count: 30 },
-            { range: '51-65', count: 20 },
-            { range: '65+', count: 8 }
-          ],
-          gender: [
-            { name: 'Male', count: 60 },
-            { name: 'Female', count: 68 }
-          ]
-        },
-        appointmentStats: {
-          total: 215,
-          completed: 198,
-          cancelled: 12,
-          noShow: 5
+      const response = await fetch(`/api/doctors/analytics?timeRange=${timeRange}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setAnalyticsData(data.data)
+      } else {
+        console.error('Failed to fetch analytics data')
+        setAnalyticsData(null)
       }
-      setAnalyticsData(mockData)
     } catch (error) {
       console.error('Error fetching analytics:', error)
+      setAnalyticsData(null)
     } finally {
       setLoading(false)
     }

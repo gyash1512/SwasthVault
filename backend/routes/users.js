@@ -8,8 +8,8 @@ const router = express.Router();
 
 // @desc    Get users (with role filtering)
 // @route   GET /api/users
-// @access  Private (Doctor, Admin)
-router.get('/', protect, authorize('doctor', 'admin'), requireVerification, async (req, res) => {
+// @access  Private
+router.get('/', protect, requireVerification, async (req, res) => {
   try {
     const { role, page = 1, limit = 50, search } = req.query;
     

@@ -40,85 +40,71 @@ export default function DoctorDashboard() {
   const fetchDoctorData = async () => {
     try {
       setLoading(true)
-      
-      // Fetch medical records where this doctor is the creator
+
+      // Fetch all patients
+      const patientsResponse = await fetch('/api/users?role=patient', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      let fetchedPatients = []
+      if (patientsResponse.ok) {
+        const patientsData = await patientsResponse.json()
+        fetchedPatients = patientsData.data || []
+        setPatients(fetchedPatients)
+      } else {
+        console.error('Failed to fetch patients')
+      }
+
+      // Fetch medical records created by this doctor
       const recordsResponse = await fetch('/api/medical-records', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
         }
       })
-      
+
+      let doctorRecords = []
       if (recordsResponse.ok) {
         const recordsData = await recordsResponse.json()
-        const allRecords = recordsData.data || []
-        
         // Filter records created by this doctor
-        const doctorRecords = allRecords.filter(record => 
-          record.doctor === user.id || record.doctor?._id === user.id
+        doctorRecords = (recordsData.data || []).filter(record =>
+          record.doctor?._id === user.id
         )
-        
-        // Extract unique patients
-        const uniquePatients = []
-        const patientMap = new Map()
-        
-        doctorRecords.forEach(record => {
-          const patientId = record.patient?._id || record.patient
-          if (!patientMap.has(patientId)) {
-            patientMap.set(patientId, {
-              patient: record.patient,
-              lastVisit: record.visitDate,
-              lastDiagnosis: record.diagnosis?.primary || 'No diagnosis',
-              recordCount: 1,
-              lastRecord: record
-            })
-            uniquePatients.push(patientMap.get(patientId))
-          } else {
-            const existing = patientMap.get(patientId)
-            existing.recordCount++
-            if (new Date(record.visitDate) > new Date(existing.lastVisit)) {
-              existing.lastVisit = record.visitDate
-              existing.lastDiagnosis = record.diagnosis?.primary || 'No diagnosis'
-              existing.lastRecord = record
-            }
-          }
-        })
-        
-        setPatients(uniquePatients)
         setRecentRecords(doctorRecords.slice(0, 10))
-        
-        // Calculate stats
-        const today = new Date()
-        const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-        const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
-        
-        const todayRecords = doctorRecords.filter(record => {
-          const recordDate = new Date(record.visitDate)
-          return recordDate >= todayStart && recordDate < todayEnd
-        })
-        
-        const pendingRecords = doctorRecords.filter(record => 
-          record.status === 'draft' || !record.status
-        )
-        
-        const criticalAlerts = doctorRecords.filter(record => {
-          // Check for critical conditions
-          return record.vitalSigns?.bloodPressure?.systolic > 180 ||
-                 record.emergencyInfo?.medicalAlerts?.some(alert => alert.severity === 'critical')
-        })
-        
-        setStats({
-          totalPatients: uniquePatients.length,
-          todayAppointments: todayRecords.length,
-          pendingRecords: pendingRecords.length,
-          criticalAlerts: criticalAlerts.length
-        })
       } else {
         console.error('Failed to fetch medical records')
-        setPatients([])
-        setRecentRecords([])
       }
-      
+
+      // Calculate stats
+      const today = new Date()
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+      const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
+
+      const todayAppointments = doctorRecords.filter(record => {
+        const recordDate = new Date(record.visitDate)
+        return recordDate >= todayStart && recordDate < todayEnd
+      }).length
+
+      const pendingRecords = doctorRecords.filter(record =>
+        record.status === 'draft' || !record.status
+      ).length
+
+      const criticalAlerts = doctorRecords.filter(record => {
+        // Check for critical conditions based on vital signs or emergency info
+        return record.vitalSigns?.bloodPressure?.systolic > 180 ||
+               record.emergencyInfo?.medicalAlerts?.some(alert => alert.severity === 'critical')
+      }).length
+
+      setStats({
+        totalPatients: fetchedPatients.length,
+        todayAppointments: todayAppointments,
+        pendingRecords: pendingRecords,
+        criticalAlerts: criticalAlerts
+      })
+
     } catch (error) {
       console.error('Error fetching doctor data:', error)
       setPatients([])

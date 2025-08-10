@@ -45,11 +45,11 @@ export default function MedicalRecordsPage({ viewMode = 'patient' }) {
       let endpoint = ''
       
       if (viewMode === 'patient') {
-        endpoint = `/api/medical-records-enhanced/patient/${user.id}/timeline`
+        endpoint = `/api/medical-records/patient/${user.id}/timeline`
       } else if (viewMode === 'doctor') {
-        endpoint = '/api/doctors/patients'
+        endpoint = '/api/medical-records' // Fetch all medical records for the doctor's view
       } else {
-        endpoint = `/api/medical-records-enhanced/patient/${user.id}/timeline`
+        endpoint = `/api/medical-records/patient/${user.id}/timeline`
       }
 
       const response = await fetch(endpoint, {
@@ -71,7 +71,7 @@ export default function MedicalRecordsPage({ viewMode = 'patient' }) {
 
   const fetchVersionHistory = async (recordId) => {
     try {
-      const response = await fetch(`/api/medical-records-enhanced/${recordId}/versions`, {
+      const response = await fetch(`/api/medical-records/${recordId}/versions`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -149,13 +149,13 @@ export default function MedicalRecordsPage({ viewMode = 'patient' }) {
         </div>
         
         {viewMode === 'doctor' && (
-          <button 
-            onClick={() => navigate('/create-record')}
-            className="bg-medical-600 text-white px-4 py-2 rounded-lg hover:bg-medical-700 transition-colors flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            New Record
-          </button>
+                <button 
+                  onClick={() => handleViewRecord(record)}
+                  className="p-2 text-medical-600 hover:bg-medical-100 rounded-lg transition-colors"
+                  title="View Details"
+                >
+                  <FileText className="h-4 w-4" />
+                </button>
         )}
       </div>
 
@@ -303,11 +303,11 @@ export default function MedicalRecordsPage({ viewMode = 'patient' }) {
                   </button>
                 )}
                 <button 
-                  onClick={() => alert('Share functionality coming soon!')}
-                  className="p-2 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors"
-                  title="Share Record"
+                  onClick={() => handleViewRecord(record)}
+                  className="p-2 text-medical-600 hover:bg-medical-100 rounded-lg transition-colors"
+                  title="View Details"
                 >
-                  <Share className="h-4 w-4" />
+                  <FileText className="h-4 w-4" />
                 </button>
               </div>
             </div>
