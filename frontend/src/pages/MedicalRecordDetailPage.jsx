@@ -30,7 +30,7 @@ export default function MedicalRecordDetailPage() {
   const fetchMedicalRecord = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/medical-records-enhanced/${recordId}`, {
+      const response = await fetch(`/api/medical-records/${recordId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

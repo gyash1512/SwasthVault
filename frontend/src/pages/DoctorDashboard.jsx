@@ -49,13 +49,12 @@ export default function DoctorDashboard() {
         }
       })
 
-      let fetchedPatients = []
+      let allPatients = []
       if (patientsResponse.ok) {
         const patientsData = await patientsResponse.json()
-        fetchedPatients = patientsData.data || []
-        setPatients(fetchedPatients)
+        allPatients = patientsData.data || []
       } else {
-        console.error('Failed to fetch patients')
+        console.error('Failed to fetch all patients')
       }
 
       // Fetch medical records created by this doctor
@@ -78,6 +77,25 @@ export default function DoctorDashboard() {
         console.error('Failed to fetch medical records')
       }
 
+      // Map patients with their latest record info
+      const patientsWithRecordInfo = allPatients.map(patient => {
+        const patientRecords = doctorRecords.filter(record =>
+          record.patient?._id === patient._id
+        ).sort((a, b) => new Date(b.visitDate) - new Date(a.visitDate)) // Sort by most recent
+
+        const lastRecord = patientRecords.length > 0 ? patientRecords[0] : null
+
+        return {
+          patient: patient,
+          lastVisit: lastRecord ? lastRecord.visitDate : null,
+          lastDiagnosis: lastRecord ? lastRecord.diagnosis?.primary : 'No diagnosis',
+          recordCount: patientRecords.length,
+          lastRecord: lastRecord
+        }
+      })
+
+      setPatients(patientsWithRecordInfo)
+
       // Calculate stats
       const today = new Date()
       const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
@@ -99,7 +117,7 @@ export default function DoctorDashboard() {
       }).length
 
       setStats({
-        totalPatients: fetchedPatients.length,
+        totalPatients: allPatients.length, // Total registered patients
         todayAppointments: todayAppointments,
         pendingRecords: pendingRecords,
         criticalAlerts: criticalAlerts
@@ -114,30 +132,36 @@ export default function DoctorDashboard() {
     }
   }
 
-  const handleCreateRecord = () => {
-    navigate('/create-record')
+  const handleCreateRecord = (patientId = null) => {
+    if (patientId) {
+      navigate('/create-record', { state: { patientId: patientId } })
+    } else {
+      navigate('/create-record')
+    }
   }
 
-  const handleViewPatient = (patientRecord) => {
-    setSelectedPatient(patientRecord)
-    // For now, navigate to patient history
-    navigate(`/patient-history/${patientRecord.patient._id}`)
+  const handleViewPatient = (patientData) => {
+    // patientData here is the combined object from `patients` state
+    navigate(`/patient-history/${patientData.patient._id}`)
   }
 
-  const handleEditRecord = (patientRecord) => {
-    // Navigate to edit the latest record or create a new one
-    navigate('/create-record', { state: { patientId: patientRecord.patient._id } })
+  const handleEditRecord = (patientData) => {
+    // Navigate to create record page with patientId pre-filled
+    handleCreateRecord(patientData.patient._id)
   }
 
   const handleViewHistory = (patientId) => {
     navigate(`/patient-history/${patientId}`)
   }
 
-  const filteredPatients = patients.filter(patient =>
-    patient.patient?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.patient?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    patient.lastDiagnosis?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredPatients = patients.filter(patientInfo => {
+    const patient = patientInfo.patient; // Access the nested patient object
+    return (
+      patient?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient?.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patientInfo.lastDiagnosis?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   if (loading) {
     return (

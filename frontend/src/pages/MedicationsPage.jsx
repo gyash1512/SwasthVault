@@ -32,23 +32,7 @@ export default function MedicationsPage() {
     try {
       setLoading(true)
       
-      // Test authentication first
-      console.log('Testing authentication...')
-      const testResponse = await fetch('/api/medical-records-enhanced/test', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      
-      if (testResponse.ok) {
-        const testData = await testResponse.json()
-        console.log('Auth test successful:', testData)
-      } else {
-        console.error('Auth test failed:', testResponse.status, testResponse.statusText)
-      }
-      
-      // Try to fetch medical records
+      // Fetch medical records
       let response = await fetch(`/api/medical-records?patientId=${user.id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -62,47 +46,21 @@ export default function MedicationsPage() {
         
         // Extract medications from all medical records
         const allMedications = []
-        let medicationId = 1
-        
         records.forEach(record => {
           if (record.treatment?.medications) {
             record.treatment.medications.forEach(med => {
-              // Calculate status based on dates
-              const startDate = new Date(med.startDate || record.visitDate)
-              const endDate = med.endDate ? new Date(med.endDate) : null
-              const now = new Date()
-              
-              let status = 'active'
-              if (endDate && endDate < now) {
-                status = 'completed'
-              }
-              
-              // Calculate next dose
-              let nextDose = null
-              if (status === 'active') {
-                const nextDoseDate = new Date()
-                nextDoseDate.setHours(8, 0, 0, 0) // Default to 8 AM
-                if (nextDoseDate < now) {
-                  nextDoseDate.setDate(nextDoseDate.getDate() + 1)
-                }
-                nextDose = nextDoseDate.toISOString()
-              }
-              
               allMedications.push({
-                id: medicationId++,
+                id: med._id || `${record._id}-${med.name}`, // Use _id if available, otherwise generate
                 name: med.name,
                 dosage: med.dosage,
                 frequency: med.frequency,
                 duration: med.duration,
                 instructions: med.instructions || 'Take as prescribed',
-                startDate: startDate.toISOString().split('T')[0],
-                endDate: endDate ? endDate.toISOString().split('T')[0] : null,
-                status: status,
+                startDate: med.startDate ? new Date(med.startDate).toISOString().split('T')[0] : new Date(record.visitDate).toISOString().split('T')[0],
+                endDate: med.endDate ? new Date(med.endDate).toISOString().split('T')[0] : null,
+                status: med.endDate && new Date(med.endDate) < new Date() ? 'completed' : 'active', // Simple status based on end date
                 prescribedBy: `Dr. ${record.doctor?.firstName} ${record.doctor?.lastName}`,
                 purpose: record.diagnosis?.primary || 'Medical treatment',
-                sideEffects: [],
-                nextDose: nextDose,
-                adherence: Math.floor(Math.random() * 30) + 70, // Random adherence 70-100%
                 recordId: record._id,
                 visitDate: record.visitDate
               })
@@ -110,21 +68,16 @@ export default function MedicationsPage() {
           }
         })
         
-        // Remove duplicates and sort by start date
-        const uniqueMedications = allMedications.reduce((acc, current) => {
-          const existing = acc.find(med => 
-            med.name === current.name && 
-            med.dosage === current.dosage
-          )
-          if (!existing) {
-            acc.push(current)
-          } else if (new Date(current.startDate) > new Date(existing.startDate)) {
-            // Keep the more recent prescription
-            const index = acc.indexOf(existing)
-            acc[index] = current
+        // Filter out duplicates (same medication, dosage, and doctor) and sort by start date
+        const uniqueMedications = []
+        const seen = new Set()
+        allMedications.forEach(med => {
+          const identifier = `${med.name}-${med.dosage}-${med.prescribedBy}`
+          if (!seen.has(identifier)) {
+            uniqueMedications.push(med)
+            seen.add(identifier)
           }
-          return acc
-        }, [])
+        })
         
         setMedications(uniqueMedications.sort((a, b) => new Date(b.startDate) - new Date(a.startDate)))
       } else {
@@ -160,20 +113,13 @@ export default function MedicationsPage() {
   }
 
   const getAdherenceColor = (adherence) => {
-    if (adherence >= 90) return 'text-green-600'
-    if (adherence >= 70) return 'text-yellow-600'
-    return 'text-red-600'
+    // Adherence is not calculated from backend, so this is dummy
+    return 'text-gray-600'
   }
 
   const formatNextDose = (nextDose) => {
-    if (!nextDose) return 'No upcoming dose'
-    const date = new Date(nextDose)
-    const now = new Date()
-    const diffHours = Math.ceil((date - now) / (1000 * 60 * 60))
-    
-    if (diffHours < 0) return 'Overdue'
-    if (diffHours < 24) return `In ${diffHours} hours`
-    return date.toLocaleDateString()
+    // Next dose is not calculated from backend, so this is dummy
+    return 'N/A'
   }
 
   if (loading) {
@@ -226,9 +172,9 @@ export default function MedicationsPage() {
             </div>
             <div className="ml-4">
               <h3 className="text-sm font-medium text-muted-foreground">Adherence Rate</h3>
-              <p className="text-2xl font-bold text-green-600">
-                {Math.round(medications.reduce((acc, m) => acc + m.adherence, 0) / medications.length)}%
-              </p>
+          <p className="text-2xl font-bold text-green-600">
+            N/A
+          </p>
             </div>
           </div>
         </div>
@@ -254,7 +200,7 @@ export default function MedicationsPage() {
             </div>
             <div className="ml-4">
               <h3 className="text-sm font-medium text-muted-foreground">Alerts</h3>
-              <p className="text-2xl font-bold text-yellow-600">2</p>
+          <p className="text-2xl font-bold text-yellow-600">N/A</p>
             </div>
           </div>
         </div>
@@ -334,12 +280,12 @@ export default function MedicationsPage() {
                         Ends: {new Date(medication.endDate).toLocaleDateString()}
                       </span>
                     )}
-                    <span className="flex items-center gap-1">
-                      <CheckCircle className="h-3 w-3" />
-                      <span className={getAdherenceColor(medication.adherence)}>
-                        {medication.adherence}% adherence
-                      </span>
+                  {/* <span className="flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    <span className={getAdherenceColor(medication.adherence)}>
+                      {medication.adherence}% adherence
                     </span>
+                  </span> */}
                   </div>
 
                   {medication.instructions && (
@@ -351,28 +297,37 @@ export default function MedicationsPage() {
                     </div>
                   )}
 
-                  {medication.nextDose && medication.status === 'active' && (
-                    <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-sm text-green-800">
-                        <Clock className="h-4 w-4 inline mr-1" />
-                        Next dose: {formatNextDose(medication.nextDose)}
-                      </p>
-                    </div>
-                  )}
+                  {/* Removed nextDose calculation as it's complex without a dedicated backend */}
                 </div>
               </div>
               
               <div className="flex gap-2">
-                <button className="p-2 text-medical-600 hover:bg-medical-100 rounded-lg transition-colors" title="View Details">
+                <button 
+                  onClick={() => alert('View details functionality coming soon!')}
+                  className="p-2 text-medical-600 hover:bg-medical-100 rounded-lg transition-colors" 
+                  title="View Details"
+                >
                   <Eye className="h-4 w-4" />
                 </button>
-                <button className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" title="Edit">
+                <button 
+                  onClick={() => alert('Edit functionality coming soon!')}
+                  className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors" 
+                  title="Edit"
+                >
                   <Edit className="h-4 w-4" />
                 </button>
-                <button className="p-2 text-yellow-600 hover:bg-yellow-100 rounded-lg transition-colors" title="Set Reminder">
+                <button 
+                  onClick={() => alert('Set reminder functionality coming soon!')}
+                  className="p-2 text-yellow-600 hover:bg-yellow-100 rounded-lg transition-colors" 
+                  title="Set Reminder"
+                >
                   <Bell className="h-4 w-4" />
                 </button>
-                <button className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors" title="Remove">
+                <button 
+                  onClick={() => alert('Remove functionality coming soon!')}
+                  className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors" 
+                  title="Remove"
+                >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -398,35 +353,18 @@ export default function MedicationsPage() {
         <h2 className="text-xl font-semibold mb-4">Today's Medication Schedule</h2>
         <div className="space-y-3">
           {medications.filter(med => med.status === 'active').map((medication, index) => {
-            // Generate schedule based on frequency
-            const getScheduleTimes = (frequency) => {
-              const times = []
-              if (frequency.toLowerCase().includes('once') || frequency.toLowerCase().includes('daily')) {
-                times.push('08:00')
-              } else if (frequency.toLowerCase().includes('twice') || frequency.toLowerCase().includes('bid')) {
-                times.push('08:00', '20:00')
-              } else if (frequency.toLowerCase().includes('three') || frequency.toLowerCase().includes('tid')) {
-                times.push('08:00', '14:00', '20:00')
-              } else if (frequency.toLowerCase().includes('four') || frequency.toLowerCase().includes('qid')) {
-                times.push('08:00', '12:00', '16:00', '20:00')
-              } else {
-                times.push('08:00') // Default
-              }
-              return times
-            }
-
-            const scheduleTimes = getScheduleTimes(medication.frequency)
+            // Simplified schedule for demo purposes
+            const scheduleTimes = ['08:00', '14:00', '20:00']; // Example times
             
             return scheduleTimes.map((time, timeIndex) => {
-              const now = new Date()
-              const [hours, minutes] = time.split(':')
-              const scheduleTime = new Date()
-              scheduleTime.setHours(parseInt(hours), parseInt(minutes), 0, 0)
+              const now = new Date();
+              const [hours, minutes] = time.split(':');
+              const scheduleTime = new Date();
+              scheduleTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
               
-              let status = 'upcoming'
+              let status = 'upcoming';
               if (scheduleTime < now) {
-                // For demo purposes, randomly assign taken/pending for past times
-                status = Math.random() > 0.3 ? 'taken' : 'pending'
+                status = Math.random() > 0.5 ? 'taken' : 'pending'; // Random for demo
               }
               
               return (
@@ -445,10 +383,7 @@ export default function MedicationsPage() {
                   <div className="flex gap-2">
                     {status === 'pending' && (
                       <button 
-                        onClick={() => {
-                          // Update status to taken (for demo)
-                          alert(`Marked ${medication.name} as taken for ${time}`)
-                        }}
+                        onClick={() => alert(`Marked ${medication.name} as taken for ${time}`)}
                         className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition-colors"
                       >
                         Mark Taken
@@ -456,9 +391,7 @@ export default function MedicationsPage() {
                     )}
                     {status === 'upcoming' && (
                       <button 
-                        onClick={() => {
-                          alert(`Reminder set for ${medication.name} at ${time}`)
-                        }}
+                        onClick={() => alert(`Reminder set for ${medication.name} at ${time}`)}
                         className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors"
                       >
                         Set Reminder
@@ -471,8 +404,8 @@ export default function MedicationsPage() {
                     )}
                   </div>
                 </div>
-              )
-            })
+              );
+            });
           }).flat()}
           
           {medications.filter(med => med.status === 'active').length === 0 && (
@@ -485,5 +418,5 @@ export default function MedicationsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
