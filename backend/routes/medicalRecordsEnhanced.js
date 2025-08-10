@@ -110,6 +110,47 @@ router.get('/patient/:patientId/timeline', protect, requireVerification, async (
   }
 });
 
+// @desc    Get single medical record
+// @route   GET /api/medical-records-enhanced/:recordId
+// @access  Private
+router.get('/:recordId', protect, requireVerification, async (req, res) => {
+  try {
+    const { recordId } = req.params;
+
+    const record = await MedicalRecord.findById(recordId)
+      .populate('doctor', 'firstName lastName specialization')
+      .populate('patient', 'firstName lastName dateOfBirth bloodGroup');
+
+    if (!record) {
+      return res.status(404).json({
+        success: false,
+        message: 'Medical record not found'
+      });
+    }
+
+    // Check access permissions
+    const hasAccess = await checkRecordAccess(record, req.user.id, req.user.role);
+    if (!hasAccess) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied to this record'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: record
+    });
+
+  } catch (error) {
+    logger.error('Get single medical record error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve medical record'
+    });
+  }
+});
+
 // @desc    Create new medical record with version control
 // @route   POST /api/medical-records/create
 // @access  Private (Doctor only)
@@ -118,11 +159,6 @@ router.post('/create', protect, authorize('doctor'), requireVerification, async 
     const recordData = {
       ...req.body,
       doctor: req.user.id,
-      digitalSignature: {
-        doctorSignature: generateDigitalSignature(req.body, req.user.id),
-        signatureDate: new Date(),
-        verificationHash: generateVerificationHash(req.body)
-      },
       auditTrail: [{
         action: 'created',
         performedBy: req.user.id,

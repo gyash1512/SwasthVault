@@ -139,7 +139,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
-app.use('/api/medical-records-enhanced', medicalRecordsEnhancedRoutes);
+app.use('/api/medical-records', medicalRecordsEnhancedRoutes);
 app.use('/api/emergency', emergencyRoutes);
 app.use('/api/audit', auditRoutes);
 app.use('/api/upload', uploadRoutes);

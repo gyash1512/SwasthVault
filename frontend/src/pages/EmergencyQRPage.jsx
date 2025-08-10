@@ -60,14 +60,16 @@ export default function EmergencyQRPage() {
   }
 
   const handleDownload = () => {
-    // In a real implementation, this would generate and download a QR code image
-    const element = document.createElement('a')
-    const file = new Blob([`Emergency QR Data: ${qrData}`], { type: 'text/plain' })
-    element.href = URL.createObjectURL(file)
-    element.download = `emergency-qr-${user.firstName}-${user.lastName}.txt`
-    document.body.appendChild(element)
-    element.click()
-    document.body.removeChild(element)
+    const canvas = document.querySelector('canvas')
+    const pngUrl = canvas
+      .toDataURL('image/png')
+      .replace('image/png', 'image/octet-stream')
+    let downloadLink = document.createElement('a')
+    downloadLink.href = pngUrl
+    downloadLink.download = `emergency-qr-${user.firstName}-${user.lastName}.png`
+    document.body.appendChild(downloadLink)
+    downloadLink.click()
+    document.body.removeChild(downloadLink)
   }
 
   const handleCopy = async () => {

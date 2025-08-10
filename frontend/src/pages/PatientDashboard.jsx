@@ -163,7 +163,10 @@ export default function PatientDashboard() {
         <div className="lg:col-span-2 medical-card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Recent Medical Records</h2>
-            <button className="text-medical-600 hover:text-medical-700 text-sm font-medium">
+            <button 
+              onClick={() => navigate('/medical-records')}
+              className="text-medical-600 hover:text-medical-700 text-sm font-medium"
+            >
               View All
             </button>
           </div>
