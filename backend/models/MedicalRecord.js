@@ -312,19 +312,6 @@ const medicalRecordSchema = new mongoose.Schema({
     }]
   },
 
-  // Digital Signature and Verification
-  digitalSignature: {
-    doctorSignature: {
-      type: String,
-      required: [true, 'Doctor digital signature is required']
-    },
-    signatureDate: {
-      type: Date,
-      default: Date.now
-    },
-    verificationHash: String
-  },
-
   // Document Attachments
   attachments: [{
     fileName: String,

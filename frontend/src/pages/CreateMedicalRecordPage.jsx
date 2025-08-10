@@ -69,9 +69,6 @@ export default function CreateMedicalRecordPage() {
         pincode: '123456'
       },
       registrationNumber: 'HOSP001'
-    },
-    digitalSignature: {
-      doctorSignature: ''
     }
   })
 
