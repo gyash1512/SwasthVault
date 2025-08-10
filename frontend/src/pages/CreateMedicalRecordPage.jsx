@@ -311,7 +311,6 @@ export default function CreateMedicalRecordPage() {
     if (!formData.patient) errors.patient = 'Please select a patient'
     if (!formData.chiefComplaint.trim()) errors.chiefComplaint = 'Chief complaint is required'
     if (!formData.diagnosis.primary.trim()) errors.primaryDiagnosis = 'Primary diagnosis is required'
-    if (!formData.digitalSignature.doctorSignature.trim()) errors.doctorSignature = 'Doctor signature is required'
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors)
